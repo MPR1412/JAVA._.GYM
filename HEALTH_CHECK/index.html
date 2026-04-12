@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#0a0a0a">
+<title>Java Health Checkup · java._.gym</title>
+</head>
+<body>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Courier New',monospace;background:#000}
+.app{min-height:600px;background:#0a0a0a;border-radius:16px;overflow:hidden;max-width:400px;margin:0 auto;border:2px solid #1a1a1a;position:relative}
+
+/* screens */
+.screen{display:none;flex-direction:column;min-height:600px}
+.screen.on{display:flex}
+
+/* ── INTRO ── */
+#s-intro{background:#0a0a0a;justify-content:center;align-items:center;padding:32px 24px;text-align:center}
+.intro-logo{font-size:13px;font-weight:700;color:#e94560;letter-spacing:2px;margin-bottom:6px;font-family:sans-serif}
+.intro-handle{font-size:11px;color:#444;font-family:'Courier New',monospace;margin-bottom:28px}
+.intro-title{font-size:28px;font-weight:900;color:#fff;font-family:sans-serif;line-height:1.15;margin-bottom:8px}
+.intro-title span{color:#e94560}
+.intro-sub{font-size:13px;color:#666;line-height:1.7;font-family:sans-serif;margin-bottom:6px}
+.intro-badge{display:inline-flex;align-items:center;gap:6px;background:#1a1a1a;border:1px solid #333;border-radius:20px;padding:6px 14px;font-size:11px;color:#888;font-family:sans-serif;margin-bottom:28px}
+.intro-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;margin-bottom:28px}
+.istat{background:#111;border:1px solid #1e1e1e;border-radius:10px;padding:10px 6px;text-align:center}
+.istat-num{font-size:20px;font-weight:900;color:#e94560;font-family:sans-serif}
+.istat-lbl{font-size:9px;color:#555;font-family:sans-serif;margin-top:2px;letter-spacing:.5px;text-transform:uppercase}
+.start-btn{width:100%;padding:16px;background:#e94560;border:none;border-radius:12px;font-size:14px;font-weight:900;color:#fff;cursor:pointer;font-family:sans-serif;letter-spacing:.5px;transition:opacity .15s}
+.start-btn:hover{opacity:.9}
+.disclaimer{font-size:10px;color:#333;margin-top:10px;font-family:sans-serif}
+
+/* ── QUESTION ── */
+#s-question{background:#0a0a0a;flex-direction:column}
+.q-topbar{background:#111;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1a1a1a}
+.q-progress-text{font-size:11px;color:#555;font-family:sans-serif}
+.q-score-live{font-size:11px;color:#e94560;font-family:'Courier New',monospace;background:#1a0a0a;padding:3px 10px;border-radius:10px;border:1px solid #3a1a1a}
+.progress-track{height:3px;background:#1a1a1a;width:100%}
+.progress-bar{height:3px;background:#e94560;transition:width .4s ease}
+.q-body{padding:20px 18px;flex:1;display:flex;flex-direction:column}
+.q-category{font-size:9px;font-weight:700;color:#555;letter-spacing:2px;text-transform:uppercase;font-family:sans-serif;margin-bottom:8px}
+.q-number{font-size:11px;color:#e94560;font-family:'Courier New',monospace;margin-bottom:10px}
+.q-text{font-size:17px;font-weight:700;color:#fff;line-height:1.4;font-family:sans-serif;margin-bottom:6px}
+.q-code-block{background:#111;border:1px solid #222;border-radius:8px;padding:12px 14px;margin:10px 0;font-family:'Courier New',monospace;font-size:12px;color:#ccc;line-height:1.7}
+.kw-purple{color:#c678dd}
+.kw-blue{color:#61afef}
+.kw-green{color:#98c379}
+.kw-orange{color:#e5c07b}
+.kw-red{color:#e06c75}
+.kw-yellow{color:#dcdcaa}
+.kw-teal{color:#56b6c2}
+.kw-white{color:#fff}
+.q-hint{font-size:10px;color:#444;font-family:sans-serif;margin-bottom:14px;font-style:italic}
+.options{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.opt{padding:12px 14px;border-radius:10px;border:1.5px solid #222;background:#111;color:#ccc;font-size:13px;font-family:'Courier New',monospace;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:10px;text-align:left}
+.opt:hover{border-color:#444;background:#161616}
+.opt-letter{width:22px;height:22px;border-radius:6px;background:#1a1a1a;border:1px solid #333;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#666;flex-shrink:0;font-family:sans-serif}
+.opt.selected{border-color:#e94560;background:#1a0808;color:#fff}
+.opt.selected .opt-letter{background:#e94560;border-color:#e94560;color:#fff}
+.opt.correct{border-color:#27ae60;background:#0a1a0a;color:#7dffb3;pointer-events:none}
+.opt.correct .opt-letter{background:#27ae60;border-color:#27ae60;color:#fff}
+.opt.wrong{border-color:#333;background:#0f0f0f;color:#444;pointer-events:none}
+.opt.wrong .opt-letter{background:#1a1a1a;color:#333}
+.opt.reveal-correct{border-color:#27ae60;background:#0a1a0a;color:#7dffb3;pointer-events:none}
+.opt.reveal-correct .opt-letter{background:#27ae60;color:#fff}
+.feedback-box{margin-top:12px;padding:10px 12px;border-radius:8px;font-size:12px;font-family:sans-serif;line-height:1.5;display:none}
+.feedback-box.show{display:block}
+.feedback-box.correct-fb{background:#0a1a0a;border:1px solid #27ae60;color:#7dffb3}
+.feedback-box.wrong-fb{background:#1a0808;border:1px solid #e94560;color:#f09595}
+.next-btn{margin-top:14px;width:100%;padding:13px;background:#e94560;border:none;border-radius:10px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:sans-serif;display:none;transition:opacity .15s}
+.next-btn.show{display:block}
+.next-btn:hover{opacity:.9}
+
+/* ── LOADER ── */
+#s-loader{background:#0a0a0a;justify-content:center;align-items:center;padding:32px 24px;text-align:center}
+.loader-icon{font-size:40px;margin-bottom:16px}
+.loader-title{font-size:20px;font-weight:900;color:#fff;font-family:sans-serif;margin-bottom:6px}
+.loader-sub{font-size:12px;color:#555;font-family:sans-serif;margin-bottom:28px}
+.loader-track{width:100%;height:6px;background:#1a1a1a;border-radius:3px;margin-bottom:10px;overflow:hidden}
+.loader-fill{height:6px;background:#e94560;border-radius:3px;width:0%;transition:width .08s linear}
+.loader-pct{font-size:12px;color:#e94560;font-family:'Courier New',monospace;margin-bottom:20px}
+.loader-steps{text-align:left;width:100%}
+.lstep{font-size:11px;font-family:'Courier New',monospace;padding:5px 0;color:#333;display:flex;align-items:center;gap:8px;transition:color .3s}
+.lstep.done{color:#27ae60}
+.lstep.active{color:#f5a623}
+.lstep-dot{width:6px;height:6px;border-radius:50%;background:#333;flex-shrink:0;transition:background .3s}
+.lstep.done .lstep-dot{background:#27ae60}
+.lstep.active .lstep-dot{background:#f5a623}
+
+/* ── REPORT ── */
+#s-report{background:#0a0a0a;flex-direction:column}
+.report-header{padding:20px 18px 14px;background:#111;border-bottom:1px solid #1a1a1a}
+.report-handle{font-size:10px;color:#555;font-family:'Courier New',monospace;margin-bottom:4px}
+.report-title{font-size:16px;font-weight:900;color:#fff;font-family:sans-serif}
+.report-date{font-size:10px;color:#444;font-family:sans-serif;margin-top:2px}
+.report-body{padding:16px 18px;flex:1;overflow-y:auto}
+.report-score-block{border-radius:12px;padding:16px;margin-bottom:14px;text-align:center}
+.rsb-score{font-size:52px;font-weight:900;font-family:sans-serif}
+.rsb-label{font-size:11px;font-family:sans-serif;margin-top:2px;opacity:.8}
+.rsb-title{font-size:18px;font-weight:900;font-family:sans-serif;margin-top:8px}
+.rsb-desc{font-size:12px;font-family:sans-serif;margin-top:4px;opacity:.8;line-height:1.5}
+.vitals-section{margin-bottom:14px}
+.vs-title{font-size:10px;font-weight:700;color:#555;letter-spacing:1.5px;text-transform:uppercase;font-family:sans-serif;margin-bottom:8px}
+.vital-row{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.vr-name{font-size:11px;color:#888;font-family:sans-serif;width:110px;flex-shrink:0}
+.vr-bar-track{flex:1;height:7px;background:#1a1a1a;border-radius:4px;overflow:hidden}
+.vr-bar-fill{height:7px;border-radius:4px;transition:width 1s ease}
+.vr-val{font-size:10px;font-family:'Courier New',monospace;width:28px;text-align:right;flex-shrink:0}
+.missed-section{margin-bottom:14px}
+.missed-item{background:#110808;border:1px solid #2a1010;border-radius:8px;padding:10px 12px;margin-bottom:6px}
+.mi-q{font-size:11px;color:#f09595;font-family:sans-serif;margin-bottom:3px}
+.mi-your{font-size:11px;font-family:'Courier New',monospace;color:#555}
+.mi-correct{font-size:11px;font-family:'Courier New',monospace;color:#7dffb3}
+.mi-exp{font-size:10px;color:#666;font-family:sans-serif;margin-top:3px;line-height:1.4}
+.prescription-box{background:#0a1a0a;border:1px solid #1a3a1a;border-radius:10px;padding:14px;margin-bottom:14px}
+.rx-title{font-size:11px;font-weight:700;color:#27ae60;font-family:sans-serif;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.rx-item{font-size:12px;color:#7dffb3;font-family:sans-serif;padding:4px 0;display:flex;align-items:flex-start;gap:8px;line-height:1.4}
+.rx-dot{color:#27ae60;flex-shrink:0;margin-top:1px}
+.share-section{text-align:center;padding-top:4px}
+.share-tag{font-size:12px;color:#555;font-family:sans-serif;margin-bottom:10px}
+.retry-btn{width:100%;padding:13px;background:#e94560;border:none;border-radius:10px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:sans-serif;margin-bottom:8px}
+.follow-btn{width:100%;padding:12px;background:transparent;border:1.5px solid #333;border-radius:10px;font-size:12px;color:#888;cursor:pointer;font-family:sans-serif}
+.follow-btn:hover{border-color:#e94560;color:#e94560}
+.tagline{font-size:10px;color:#333;font-family:'Courier New',monospace;margin-top:10px}
+</style>
+
+<div class="app">
+<h2 class="sr-only">java._.gym interactive Java health check — 10 tricky questions with instant feedback and health report</h2>
+
+<!-- ═══ INTRO ═══ -->
+<div class="screen on" id="s-intro">
+  <div class="intro-logo">JAVA._.GYM</div>
+  <div class="intro-handle">@java._.gym · Instagram</div>
+  <div class="intro-title">Java Health<br><span>Checkup</span></div>
+  <div style="margin:10px 0 4px;font-size:32px">🩺</div>
+  <div class="intro-sub">Before you start training,<br>let's see where you actually stand.</div>
+  <div class="intro-badge">⚠️ <span>No cheating. No Google. Be honest.</span></div>
+  <div class="intro-stats">
+    <div class="istat"><div class="istat-num">15</div><div class="istat-lbl">Questions</div></div>
+    <div class="istat"><div class="istat-num">~7</div><div class="istat-lbl">Minutes</div></div>
+    <div class="istat"><div class="istat-num">4</div><div class="istat-lbl">Levels</div></div>
+  </div>
+  <button class="start-btn" onclick="startQuiz()">Start Health Checkup →</button>
+  <div class="disclaimer">Results are brutally honest. You've been warned.</div>
+</div>
+
+<!-- ═══ QUESTION ═══ -->
+<div class="screen" id="s-question">
+  <div class="q-topbar">
+    <span class="q-progress-text" id="q-prog-text">Question 1 of 10</span>
+    <span class="q-score-live" id="q-score-live">Score: 0</span>
+  </div>
+  <div class="progress-track"><div class="progress-bar" id="q-prog-bar" style="width:10%"></div></div>
+  <div class="q-body" id="q-body">
+    <!-- filled dynamically -->
+  </div>
+</div>
+
+<!-- ═══ LOADER ═══ -->
+<div class="screen" id="s-loader">
+  <div class="loader-icon">📋</div>
+  <div class="loader-title">Preparing Your<br>Java Health Report</div>
+  <div class="loader-sub">Analysing your answers...</div>
+  <div class="loader-track"><div class="loader-fill" id="lfill"></div></div>
+  <div class="loader-pct" id="lpct">0%</div>
+  <div class="loader-steps" id="lsteps">
+    <div class="lstep" id="ls0"><div class="lstep-dot"></div>Scanning your JVM knowledge...</div>
+    <div class="lstep" id="ls1"><div class="lstep-dot"></div>Checking OOP muscle memory...</div>
+    <div class="lstep" id="ls2"><div class="lstep-dot"></div>Measuring output accuracy...</div>
+    <div class="lstep" id="ls3"><div class="lstep-dot"></div>Diagnosing exception handling...</div>
+    <div class="lstep" id="ls4"><div class="lstep-dot"></div>Calculating Java fitness level...</div>
+    <div class="lstep" id="ls5"><div class="lstep-dot"></div>Generating health report...</div>
+  </div>
+</div>
+
+<!-- ═══ REPORT ═══ -->
+<div class="screen" id="s-report">
+  <div class="report-header">
+    <div class="report-handle">@java._.gym</div>
+    <div class="report-title">Java Health Report</div>
+    <div class="report-date" id="rep-date"></div>
+  </div>
+  <div class="report-body" id="rep-body"></div>
+</div>
+
+</div>
+
+<script>
+
+const Qs=[
+  /* Q1 — String Pool vs Heap */
+  {
+    cat:"String Pool vs Heap",
+    vital:"String Internals",
+    text:"What is the output of this code?",
+    code:`<span class="kw-purple">String</span> a = <span class="kw-green">"java"</span>;
+<span class="kw-purple">String</span> b = <span class="kw-green">"java"</span>;
+<span class="kw-purple">String</span> c = <span class="kw-blue">new</span> <span class="kw-purple">String</span>(<span class="kw-green">"java"</span>);
+<span class="kw-yellow">System</span>.out.<span class="kw-teal">println</span>(a == b);
+<span class="kw-yellow">System</span>.out.<span class="kw-teal">println</span>(a == c);`,
+    opts:["true / true","true / false","false / true","false / false"],
+    ans:1,
+    exp:"String literals share the same reference from the String Pool (a==b is true). new String() always creates a brand-new object on the heap — bypassing the pool — so a==c compares different references (false). Never use == to compare String content. Always use .equals()."
+  },
+  /* Q2 — Type Promotion */
+  {
+    cat:"Type Promotion Trap",
+    vital:"Type Promotion",
+    text:"What does this print?",
+    code:`<span class="kw-purple">byte</span> x = <span class="kw-orange">40</span>;
+<span class="kw-purple">byte</span> y = <span class="kw-orange">50</span>;
+<span class="kw-purple">byte</span> z = (<span class="kw-purple">byte</span>)(x + y);
+<span class="kw-yellow">System</span>.out.<span class="kw-teal">println</span>(z);`,
+    opts:["90","Compile error without cast","-90","0"],
+    ans:0,
+    exp:"byte + byte is automatically promoted to int by Java's type promotion rule. Without the (byte) cast it would be a compile error. With it: 40+50=90, which fits in byte range (-128 to 127), so output is 90. If values exceeded 127, overflow would occur — e.g. 100+100=200 casts to -56."
+  },
+  /* Q3 — Integer Cache */
+  {
+    cat:"Integer Cache — Interview Killer",
+    vital:"Integer Cache",
+    text:"What is printed?",
+    code:`<span class="kw-purple">Integer</span> a = <span class="kw-orange">127</span>;
+<span class="kw-purple">Integer</span> b = <span class="kw-orange">127</span>;
+<span class="kw-purple">Integer</span> c = <span class="kw-orange">128</span>;
+<span class="kw-purple">Integer</span> d = <span class="kw-orange">128</span>;
+<span class="kw-yellow">System</span>.out.<span class="kw-teal">println</span>(a == b);
+<span class="kw-yellow">System</span>.out.<span class="kw-teal">println</span>(c == d);`,
+    opts:["true / true","false / false","true / false","false / true"],
+    ans:2,
+    exp:"Java caches Integer objects for values -128 to 127. a and b both point to the same cached object so == returns true. 128 is outside the cache — c and d are two separate new heap objects so == returns false. This trips up even experienced developers. Always use .equals() for Integer comparison."
+  },
+  /* Q4 — Exception Handling */
+  {
+    cat:"Exception Handling",
+    vital:"Exception Handling",
+    text:"What is the output?",
+    code:`<span class="kw-purple">try</span> {
+  <span class="kw-yellow">System</span>.out.<span class="kw-teal">print</span>(<span class="kw-green">"A"</span>);
+  <span class="kw-purple">return</span>;
+} <span class="kw-purple">finally</span> {
+  <span class="kw-yellow">System</span>.out.<span class="kw-teal">print</span>(<span class="kw-green">"B"</span>);
+}`,
+    opts:["A","B","AB","Compile error"],
+    ans:2,
+    exp:"finally ALWAYS executes — even when there is a return in the try block. The return is paused, finally runs and prints B, then the method returns. Output is AB. The only exceptions: System.exit() is called or the JVM itself crashes. This is a very common interview question."
+  },
+  /* Q5 — String Immutability */
+  {
+    cat:"String Immutability",
+    vital:"String Internals",
+    text:"What does this print?",
+    code:`<span class="kw-purple">String</span> s = <span class="kw-green">"Hello"</span>;
+s.<span class="kw-teal">concat</span>(<span class="kw-green">" World"</span>);
+<span class="kw-yellow">System</span>.out.<span class="kw-teal">println</span>(s.<span class="kw-teal">length</span>());`,
+    opts:["11","5","Compile error","NullPointerException"],
+    ans:1,
+    exp:"String is IMMUTABLE. concat() creates a brand-new String but the return value is discarded — nobody captured it. s still points to 'Hello' which has length 5. The most common String trap. Fix: s = s.concat(' World'); to actually keep the result."
+  },
+  /* Q6 — Static Context */
+  {
+    cat:"Static Context Rule",
+    vital:"OOP Concepts",
+    text:"What happens when you compile this?",
+    code:`<span class="kw-purple">public class</span> <span class="kw-blue">Test</span> {
+  <span class="kw-purple">int</span> x = <span class="kw-orange">10</span>;
+  <span class="kw-purple">static void</span> <span class="kw-teal">show</span>() {
+    <span class="kw-yellow">System</span>.out.<span class="kw-teal">println</span>(x);
+  }
+}`,
+    opts:["Prints 10","Prints 0","Compile error","Runtime error"],
+    ans:2,
+    exp:"COMPILE ERROR: 'non-static variable x cannot be referenced from a static context'. Static methods belong to the class, not any instance — they have no 'this' reference. Fix: make x static, or create an object inside show(): new Test().x"
+  },
+  /* Q7 — Inheritance Field Trap */
+  {
+    cat:"Inheritance — Field Hiding",
+    vital:"OOP Concepts",
+    text:"What is printed?",
+    code:`<span class="kw-purple">class</span> <span class="kw-blue">A</span> { <span class="kw-purple">int</span> x = <span class="kw-orange">5</span>; }
+<span class="kw-purple">class</span> <span class="kw-blue">B</span> <span class="kw-purple">extends</span> <span class="kw-blue">A</span> { <span class="kw-purple">int</span> x = <span class="kw-orange">10</span>; }
+<span class="kw-blue">A</span> obj = <span class="kw-blue">new</span> <span class="kw-blue">B</span>();
+<span class="kw-yellow">System</span>.out.<span class="kw-teal">println</span>(obj.x);`,
+    opts:["10","5","Compile error","0"],
+    ans:1,
+    exp:"Output is 5! Fields are NOT polymorphic in Java — only methods are. The reference type is A, so obj.x resolves to A's x=5 at compile time (field hiding, not overriding). If x were a method, runtime polymorphism would kick in and B's version would run. Fields always follow the reference type."
+  },
+  /* Q8 — Post-increment */
+  {
+    cat:"Post-increment Trap",
+    vital:"Output Prediction",
+    text:"What is the final value of x?",
+    code:`<span class="kw-purple">int</span> x = <span class="kw-orange">5</span>;
+x = x++;
+<span class="kw-yellow">System</span>.out.<span class="kw-teal">println</span>(x);`,
+    opts:["6","5","Compile error","Undefined"],
+    ans:1,
+    exp:"x is STILL 5. x++ (post-increment) first returns the current value (5) and then increments. But the assignment x= immediately writes the returned value (5) back to x. The increment to 6 happens internally but is overwritten. Use ++x (pre-increment) to actually get 6."
+  },
+  /* Q9 — Collections */
+  {
+    cat:"Collections — Fixed-Size Trap",
+    vital:"Collections",
+    text:"What exception is thrown on the last line?",
+    code:`<span class="kw-purple">List</span>&lt;<span class="kw-blue">String</span>&gt; list =
+  <span class="kw-blue">Arrays</span>.<span class="kw-teal">asList</span>(<span class="kw-green">"a"</span>, <span class="kw-green">"b"</span>, <span class="kw-green">"c"</span>);
+list.<span class="kw-teal">add</span>(<span class="kw-green">"d"</span>);`,
+    opts:["NullPointerException","ConcurrentModificationException","UnsupportedOperationException","IndexOutOfBoundsException"],
+    ans:2,
+    exp:"Arrays.asList() returns a FIXED-SIZE list backed by the original array. add() and remove() throw UnsupportedOperationException because the size cannot change. set() is allowed. For a fully mutable list: new ArrayList<>(Arrays.asList('a','b','c'))"
+  },
+  /* Q10 — Autoboxing NPE */
+  {
+    cat:"Autoboxing — Silent NPE",
+    vital:"Autoboxing / NPE",
+    text:"What is the output?",
+    code:`<span class="kw-purple">Integer</span> i = <span class="kw-blue">null</span>;
+<span class="kw-purple">int</span> j = i;
+<span class="kw-yellow">System</span>.out.<span class="kw-teal">println</span>(j);`,
+    opts:["0","null","Compile error","NullPointerException"],
+    ans:3,
+    exp:"NullPointerException at runtime. Assigning Integer i (null) to int j triggers unboxing — Java calls i.intValue() behind the scenes. Since i is null, calling a method on it throws NPE. This is one of the most silent autoboxing traps. Always null-check before unboxing a wrapper type."
+  },
+  /* Q11 — Multithreading */
+  {
+    cat:"Multithreading — Visibility",
+    vital:"Multithreading",
+    text:"What is the purpose of the volatile keyword in Java?",
+    code:`<span class="kw-purple">class</span> <span class="kw-blue">Worker</span> {
+  <span class="kw-purple">volatile boolean</span> running = <span class="kw-orange">true</span>;
+  <span class="kw-purple">void</span> <span class="kw-teal">stop</span>() { running = <span class="kw-orange">false</span>; }
+}`,
+    opts:[
+      "Makes the variable thread-safe for compound operations",
+      "Ensures changes are visible to all threads immediately — no CPU cache",
+      "Prevents the variable from being garbage collected",
+      "Locks the variable so only one thread can access it"
+    ],
+    ans:1,
+    exp:"volatile ensures every read/write goes directly to main memory — not a thread's local CPU cache. So when one thread sets running=false, all other threads see the updated value immediately. It does NOT make compound operations (like i++) atomic — use synchronized or AtomicInteger for that."
+  },
+  /* Q12 — Abstract vs Interface */
+  {
+    cat:"Abstract Class vs Interface",
+    vital:"Abstract vs Interface",
+    text:"Which statement about abstract classes and interfaces is CORRECT in Java 8+?",
+    opts:[
+      "A class can extend multiple abstract classes",
+      "Interfaces cannot have any method implementations",
+      "Abstract classes can have constructors; interfaces cannot",
+      "Both abstract classes and interfaces can be instantiated directly"
+    ],
+    ans:2,
+    exp:"Abstract classes CAN have constructors (called via super() from subclass). Interfaces CANNOT have constructors. A class can only extend ONE abstract class but implement MULTIPLE interfaces. Since Java 8, interfaces CAN have default and static methods with implementations. Neither can be instantiated directly."
+  },
+  /* Q13 — Method Overriding */
+  {
+    cat:"Method Overriding Rules",
+    vital:"Method Overriding",
+    text:"Which of these is a valid method override in Java?",
+    code:`<span class="kw-purple">class</span> <span class="kw-blue">Animal</span> {
+  <span class="kw-purple">protected</span> <span class="kw-blue">Number</span> <span class="kw-teal">getValue</span>() { <span class="kw-purple">return</span> <span class="kw-orange">1</span>; }
+}
+<span class="kw-purple">class</span> <span class="kw-blue">Dog</span> <span class="kw-purple">extends</span> <span class="kw-blue">Animal</span> {`,
+    opts:[
+      "private Integer getValue() { return 2; }",
+      "public Integer getValue() { return 2; }",
+      "public String getValue() { return \"2\"; }",
+      "protected Number getValue() throws Exception { return 2; }"
+    ],
+    ans:1,
+    exp:"Option B is correct. It is a valid covariant return type override — Integer is a subtype of Number, which is allowed. The access modifier is widened from protected to public, which is also allowed. Option A fails (can't reduce visibility). Option C fails (String is not a subtype of Number). Option D fails (can't add a new checked exception to the override)."
+  },
+  /* Q14 — HashMap */
+  {
+    cat:"HashMap Internals",
+    vital:"HashMap Internals",
+    text:"What happens when two keys have the same hashCode() in a HashMap?",
+    opts:[
+      "The second key-value pair overwrites the first",
+      "A duplicate key exception is thrown",
+      "Both entries are stored in a linked list (or tree) at the same bucket",
+      "The HashMap automatically resizes to avoid collision"
+    ],
+    ans:2,
+    exp:"This is a hash collision. HashMap stores both entries in the same bucket as a linked list (Java 7) or a balanced red-black tree (Java 8+ when bucket size exceeds 8, called treeification). The correct entry is then found using .equals(). This is why you must override BOTH hashCode() and equals() consistently."
+  },
+  /* Q15 — Garbage Collection */
+  {
+    cat:"Garbage Collection",
+    vital:"Garbage Collection",
+    text:"When does an object become eligible for garbage collection?",
+    code:`<span class="kw-blue">Student</span> s1 = <span class="kw-blue">new</span> <span class="kw-blue">Student</span>();
+<span class="kw-blue">Student</span> s2 = s1;
+s1 = <span class="kw-blue">null</span>;
+<span class="kw-teal">// Is the Student object GC eligible here?</span>`,
+    opts:[
+      "Yes — s1 is null so the object is eligible",
+      "No — s2 still holds a reference to the same object",
+      "Yes — calling System.gc() here would collect it",
+      "No — the object is on the stack, not the heap"
+    ],
+    ans:1,
+    exp:"NO. s2 still holds a live reference to the same object. An object only becomes GC eligible when it has NO reachable references pointing to it. Setting s1=null just removes one reference — s2 still keeps the object alive. Also, System.gc() is only a suggestion to the JVM — it does not guarantee immediate collection."
+  }
+];
+
+const TIERS=[
+  {min:0,max:4,
+   col:"#e94560",bg:"#110508",border:"#3a1020",
+   emoji:"🛋️",title:"Couch Potato",
+   desc:"Severe Java Deficiency detected (SJD-404). Most vitals are critical. This is exactly why java._.gym exists. Everyone starts somewhere — no shame, just training.",
+   rx:["Start from Day 1 — Foundations Phase — zero shortcuts",
+       "Read every post explanation in full, never skip",
+       "Focus on String internals and OOP basics first",
+       "Retake this checkup after 30 days of training"]},
+  {min:5,max:8,
+   col:"#f5a623",bg:"#110a00",border:"#3a2000",
+   emoji:"🚶",title:"Weekend Warrior",
+   desc:"You have seen Java before but haven't trained consistently. Several vitals are weak and the edge cases are catching you. Needs daily reps.",
+   rx:["Strengthen String internals — pool, immutability, equals vs ==",
+       "Master type promotion and Integer cache boundaries",
+       "Revise multithreading basics — volatile vs synchronized",
+       "Daily practice beats weekend cramming — always"]},
+  {min:9,max:12,
+   col:"#85B7EB",bg:"#040e1a",border:"#0c2a40",
+   emoji:"💪",title:"Gym Regular",
+   desc:"Solid Java foundation. You understand core concepts well. A few advanced traps caught you — that is normal at this stage. Keep pushing.",
+   rx:["Deep dive into HashMap internals and Collections edge cases",
+       "Study abstract class vs interface — Java 8+ default methods",
+       "Revise method overriding rules — covariant types, visibility",
+       "Interview preparation starts now — you are ready for it"]},
+  {min:13,max:15,
+   col:"#27ae60",bg:"#030f07",border:"#0a3018",
+   emoji:"🏆",title:"Certified Beast",
+   desc:"Exceptional Java knowledge across all major topics. Your vitals are healthy. You caught most of the traps. Ready for serious interview preparation.",
+   rx:["Move to advanced — JVM internals, GC tuning, memory model",
+       "Start DSA and system design preparation rounds",
+       "Help others in the comments — teaching cements knowledge",
+       "Spring Boot, Microservices and interview rounds are next"]}
+];
+
+const VITAL_MAP={
+  "String Internals":      [0,4],
+  "Type Promotion":        [1],
+  "Integer Cache":         [2],
+  "Exception Handling":    [3],
+  "OOP Concepts":          [5,6],
+  "Output Prediction":     [7],
+  "Collections":           [8],
+  "Autoboxing / NPE":      [9],
+  "Multithreading":        [10],
+  "Abstract vs Interface": [11],
+  "Method Overriding":     [12],
+  "HashMap Internals":     [13],
+  "Garbage Collection":    [14]
+};
+let cur=0, score=0, userAnswers=[], answered=false;
+
+function startQuiz(){
+  showScreen('s-question');
+  cur=0; score=0; userAnswers=[];
+  renderQ();
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+}
+
+function renderQ(){
+  const q=Qs[cur];
+  answered=false;
+  document.getElementById('q-prog-text').textContent=`Question ${cur+1} of ${Qs.length}`;
+  document.getElementById('q-score-live').textContent=`Score: ${score}/15`;
+  document.getElementById('q-prog-bar').style.width=`${((cur)/Qs.length)*100}%`;
+
+  let codeHtml=q.code?`<div class="q-code-block">${q.code}</div>`:'';
+  let hintHtml=q.hint?`<div class="q-hint">Hint: ${q.hint}</div>`:'';
+  let optsHtml=q.opts.map((o,i)=>`
+    <div class="opt" id="opt-${i}" onclick="selectOpt(${i})">
+      <div class="opt-letter">${String.fromCharCode(65+i)}</div>
+      <span>${o}</span>
+    </div>`).join('');
+
+  document.getElementById('q-body').innerHTML=`
+    <div class="q-category">${q.cat}</div>
+    <div class="q-number">Q${cur+1} / ${Qs.length}</div>
+    <div class="q-text">${q.text}</div>
+    ${codeHtml}
+    ${hintHtml}
+    <div class="options">${optsHtml}</div>
+    <div class="feedback-box" id="feedback"></div>
+    <button class="next-btn" id="nxt-btn" onclick="nextQ()">${cur===Qs.length-1?'See My Report →':'Next Question →'}</button>
+  `;
+}
+
+function selectOpt(idx){
+  if(answered) return;
+  answered=true;
+  const q=Qs[cur];
+  const isCorrect=(idx===q.ans);
+  if(isCorrect) score++;
+  userAnswers[cur]={chosen:idx, correct:q.ans, isCorrect};
+
+  q.opts.forEach((_,i)=>{
+    const el=document.getElementById('opt-'+i);
+    if(i===idx && isCorrect) el.className='opt correct';
+    else if(i===idx && !isCorrect) el.className='opt wrong';
+    else if(i===q.ans) el.className='opt reveal-correct';
+    else el.className='opt wrong';
+  });
+
+  const fb=document.getElementById('feedback');
+  fb.className='feedback-box show '+(isCorrect?'correct-fb':'wrong-fb');
+  fb.innerHTML=(isCorrect?'<strong>Correct!</strong> ':'<strong>Incorrect.</strong> ')+q.exp;
+
+  document.getElementById('nxt-btn').classList.add('show');
+  document.getElementById('q-score-live').textContent=`Score: ${score}/15`;
+}
+
+function nextQ(){
+  cur++;
+  if(cur>=Qs.length){ showLoader(); return; }
+  renderQ();
+}
+
+function showLoader(){
+  showScreen('s-loader');
+  const fill=document.getElementById('lfill');
+  const pct=document.getElementById('lpct');
+  const steps=['ls0','ls1','ls2','ls3','ls4','ls5'];
+  let p=0;
+  document.querySelectorAll('.lstep').forEach(s=>{s.className='lstep';});
+  const stepDuration=[800,700,900,700,600,800];
+  let stepIdx=0;
+
+  function activateStep(i){
+    if(i<steps.length){
+      document.getElementById(steps[i]).className='lstep active';
+    }
+  }
+  function doneStep(i){
+    if(i<steps.length){
+      document.getElementById(steps[i]).className='lstep done';
+    }
+  }
+
+  activateStep(0);
+  const interval=setInterval(()=>{
+    p+=1;
+    fill.style.width=p+'%';
+    pct.textContent=p+'%';
+    const stepAt=Math.floor(p/100*steps.length);
+    if(stepAt>stepIdx && stepIdx<steps.length){
+      doneStep(stepIdx);
+      stepIdx++;
+      activateStep(stepIdx);
+    }
+    if(p>=100){
+      clearInterval(interval);
+      steps.forEach((_,i)=>doneStep(i));
+      setTimeout(showReport,600);
+    }
+  },35);
+}
+
+function showReport(){
+  showScreen('s-report');
+  document.getElementById('rep-date').textContent=
+    'Generated: '+new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+
+  const pct=Math.round((score/Qs.length)*100);
+  const tier=TIERS.find(t=>score>=t.min&&score<=t.max)||tiers[0];
+
+  const missed=userAnswers.map((a,i)=>({...a,qi:i})).filter(a=>!a.isCorrect);
+
+  let missedHtml='';
+  if(missed.length){
+    missedHtml=`<div class="missed-section">
+      <div class="vs-title">Where you stumbled</div>
+      ${missed.map(m=>`<div class="missed-item">
+        <div class="mi-q">Q${m.qi+1} — ${Qs[m.qi].cat} [${Qs[m.qi].vital||''}]</div>
+        <div class="mi-your">Your answer: ${String.fromCharCode(65+m.chosen)}) ${Qs[m.qi].opts[m.chosen]}</div>
+        <div class="mi-correct">Correct: ${String.fromCharCode(65+m.correct)}) ${Qs[m.qi].opts[m.correct]}</div>
+        <div class="mi-exp">${Qs[m.qi].exp.slice(0,120)}...</div>
+      </div>`).join('')}
+    </div>`;
+  } else {
+    missedHtml=`<div class="missed-section"><div class="vs-title">Perfect score!</div><div style="font-size:13px;color:#27ae60;font-family:sans-serif;padding:8px 0">You answered all 10 questions correctly. Absolute beast mode.</div></div>`;
+  }
+
+  document.getElementById('rep-body').innerHTML=`
+    <div class="report-score-block" style="background:${tier.bg};border:1px solid ${tier.col}40">
+      <div class="rsb-score" style="color:${tier.col}">${score}/15</div>
+      <div class="rsb-label" style="color:${tier.col}aa">${pct}% accuracy</div>
+      <div class="rsb-title" style="color:#fff">${tier.title}</div>
+      <div class="rsb-desc" style="color:rgba(255,255,255,.7)">${tier.desc}</div>
+    </div>
+    <div class="vitals-section">
+      <div class="vs-title">Java Vitals</div>
+      ${Object.entries(VITAL_MAP).map(([name,idxs])=>{
+      const correct=idxs.filter(i=>userAnswers[i]&&userAnswers[i].isCorrect).length;
+      const vp=Math.round(correct/idxs.length*100);
+      const vc=vp>=70?'#27ae60':vp>=40?'#f5a623':'#e94560';
+      return `<div class="vital-row">
+        <div class="vr-name">${name}</div>
+        <div class="vr-bar-track"><div class="vr-bar-fill" style="width:${vp}%;background:${vc}"></div></div>
+        <div class="vr-val" style="color:${vc}">${vp}%</div>
+      </div>`;}).join('')}
+    </div>
+    ${missedHtml}
+    <div class="prescription-box">
+      <div class="rx-title">📋 Prescription</div>
+      ${tier.rx.map(r=>`<div class="rx-item"><div class="rx-dot">→</div><div>${r}</div></div>`).join('')}
+      <div class="rx-item" style="margin-top:6px;color:#27ae60"><div class="rx-dot">→</div><div>Follow <strong>@java._.gym</strong> — Day 1 starts soon</div></div>
+    </div>
+    <div class="share-section">
+      <div class="share-tag">Drop your score in comments! Let's see who's the beast.</div>
+      <button class="retry-btn" onclick="retakeQuiz()">Retake Checkup</button>
+      <button class="follow-btn">Follow @java._.gym for Day 1</button>
+      <div class="tagline">// Your Java workout starts here</div>
+    </div>
+  `;
+}
+
+function calcCatScore(indices){
+  if(!indices.length) return 0;
+  const correct=indices.filter(i=>userAnswers[i]&&userAnswers[i].isCorrect).length;
+  return Math.round((correct/indices.length)*100);
+}
+
+function retakeQuiz(){
+  cur=0; score=0; userAnswers=[];
+  document.getElementById('lfill').style.width='0%';
+  document.getElementById('lpct').textContent='0%';
+  document.querySelectorAll('.lstep').forEach(s=>s.className='lstep');
+  showScreen('s-intro');
+}
+</script>
+
+
+</body>
+</html>
