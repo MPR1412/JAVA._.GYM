@@ -3,587 +3,438 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<meta name="theme-color" content="#0a0a0a">
-<title>Welcome Gift · java__gym</title>
+<title>Membership Card · java__gym</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
 
-:root{
-  --red:#e94560;
-  --amber:#f5a623;
-  --green:#27ae60;
-  --blue:#3a86ff;
-  --purple:#a855f7;
-  --white:#ffffff;
-  --bg:#080810;
-  --card:#0f0f1a;
-  --border:#1e1e2e;
-}
-
+:root{--red:#e94560;--bg:#080810;--border:#1a1a2e;}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{width:100%;min-height:100vh;background:var(--bg);overflow-x:hidden;font-family:'Space Mono',monospace}
-
-/* ── PARTICLE CANVAS ─────────────────────────── */
-#canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
-
-/* ── SCREENS ─────────────────────────────────── */
-.screen{display:none;flex-direction:column;align-items:center;justify-content:center;
-        min-height:100vh;padding:24px 20px;position:relative;z-index:1;text-align:center}
+html,body{min-height:100vh;background:var(--bg);font-family:'Space Mono',monospace;color:#fff;overflow-x:hidden}
+#pcvs{position:fixed;inset:0;pointer-events:none;z-index:0}
+.screen{display:none;flex-direction:column;align-items:center;min-height:100vh;padding:32px 20px 52px;position:relative;z-index:1;text-align:center}
 .screen.on{display:flex}
 
-/* ══════════════════════════════════════════════
-   SCREEN 1 — WELCOME
-══════════════════════════════════════════════ */
-#s-welcome{background:var(--bg)}
+/* ── FORM ── */
+#s-form{justify-content:flex-start;padding-top:48px}
+.eyebrow{font-size:10px;font-weight:700;color:var(--red);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;animation:fd .5s ease both}
+.big-title{font-family:'Black Han Sans',sans-serif;font-size:clamp(40px,10vw,62px);line-height:1.05;margin-bottom:8px;animation:fd .5s .07s ease both}
+.big-title span{color:var(--red)}
+.form-sub{font-size:13px;color:#333;line-height:1.7;margin-bottom:26px;animation:fd .5s .14s ease both}
+.form-box{width:100%;max-width:400px;animation:fd .5s .2s ease both}
+.av-preview{display:flex;align-items:center;gap:14px;padding:13px 16px;background:#0c0c18;border:1.5px solid var(--border);border-radius:12px;margin-bottom:16px}
+.av-chip{width:46px;height:46px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-family:'Black Han Sans',sans-serif;font-size:17px;color:#fff;flex-shrink:0;transition:background .2s}
+.av-name-p{font-size:14px;font-weight:700;color:#fff;text-align:left}
+.av-sub-p{font-size:11px;color:#333;text-align:left;margin-top:2px}
+.field{margin-bottom:14px;text-align:left}
+.field label{font-size:10px;font-weight:700;color:#2a2a3a;letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:6px}
+.opt-tag{color:#1a1a2a;font-size:9px;margin-left:4px;font-weight:400}
+.field input,.field select,.field textarea{width:100%;background:#0c0c18;border:1.5px solid var(--border);border-radius:10px;color:#fff;font-family:'Space Mono',monospace;font-size:13px;padding:12px 14px;outline:none;transition:border-color .15s;-webkit-appearance:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--red)}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23e94560'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer}
+.field select option{background:#0c0c18}
+.field textarea{resize:none;height:74px;line-height:1.6}
+.gen-btn{width:100%;padding:16px;background:var(--red);border:none;border-radius:12px;font-size:15px;font-weight:700;color:#fff;cursor:pointer;font-family:'Black Han Sans',sans-serif;letter-spacing:2px;margin-top:4px;transition:transform .15s,opacity .15s}
+.gen-btn:active{transform:scale(.97);opacity:.9}
 
-.handle-tag{font-size:11px;font-weight:700;color:var(--red);letter-spacing:3px;
-            text-transform:uppercase;margin-bottom:16px;
-            animation:fadeDown .6s ease both}
+/* ── CARD SCREEN ── */
+#s-card{justify-content:flex-start;padding-top:36px;gap:0}
+.card-label{font-size:10px;font-weight:700;color:var(--red);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;animation:fd .4s ease both}
+.card-welcome{font-family:'Black Han Sans',sans-serif;font-size:clamp(34px,8vw,46px);line-height:1.1;margin-bottom:4px;animation:fd .4s .06s ease both}
+.card-welcome span{color:var(--red)}
+.card-caption{font-size:12px;color:#222;margin-bottom:22px;animation:fd .4s .12s ease both}
 
-.welcome-title{font-family:'Black Han Sans',sans-serif;font-size:clamp(52px,13vw,88px);
-               line-height:1;color:var(--white);margin-bottom:6px;
-               animation:fadeDown .7s .1s ease both}
-.welcome-title span{color:var(--red)}
+/* ════════════════════════════════════════
+   THE ACTUAL ID CARD — HTML layout
+════════════════════════════════════════ */
+#card{
+  width:100%;max-width:420px;
+  background:#0a0a14;
+  border-radius:18px;
+  overflow:hidden;
+  position:relative;
+  animation:cardUp .6s .18s ease both;
+  flex-shrink:0;
+  /* crisp border */
+  outline:2px solid #e94560;
+  outline-offset:-1px;
+}
+@keyframes cardUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
 
-.welcome-sub{font-size:14px;color:#555;line-height:1.7;margin-bottom:32px;
-             animation:fadeDown .7s .2s ease both}
+/* red top header */
+.ci-header{
+  background:#e94560;
+  padding:16px 20px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:relative;overflow:hidden;
+}
+/* diagonal slash on header */
+.ci-header::after{
+  content:'';position:absolute;top:0;right:0;width:0;height:0;
+  border-style:solid;border-width:0 110px 66px 0;
+  border-color:transparent rgba(0,0,0,.12) transparent transparent;
+}
+.ci-gym-name{
+  font-family:'Black Han Sans',sans-serif;
+  font-size:26px;letter-spacing:2px;color:#fff;position:relative;z-index:1;
+}
+.ci-right-tag{text-align:right;position:relative;z-index:1}
+.ci-right-tag .t1{font-size:9px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.7);display:block;text-transform:uppercase}
+.ci-right-tag .t2{font-size:8px;color:rgba(255,255,255,.5);letter-spacing:1px}
 
-/* gift box SVG container */
-.box-wrap{position:relative;width:220px;height:220px;margin:0 auto 32px;cursor:pointer;
-          animation:fadeDown .8s .3s ease both}
-.box-wrap:hover .box-svg{transform:scale(1.04)}
-.box-svg{width:220px;height:220px;transition:transform .3s ease;display:block}
+/* code strip — java snippet as decoration */
+.ci-code-strip{
+  background:#050510;
+  padding:10px 20px;
+  font-size:11px;
+  font-family:'Space Mono',monospace;
+  color:#1e1e3a;
+  white-space:nowrap;
+  overflow:hidden;
+  border-bottom:1px solid #0f0f1e;
+  letter-spacing:.5px;
+}
+.ci-code-strip .kw{color:#e9456030}
+.ci-code-strip .fn{color:#f5a62325}
+.ci-code-strip .str{color:#27ae6025}
 
-/* dumbbell drop animation */
-.dumbbell-svg{position:absolute;top:-110px;left:50%;transform:translateX(-50%);
-              width:100px;height:100px;opacity:0;pointer-events:none}
-.dumbbell-svg.drop{animation:dumbbellDrop .5s cubic-bezier(.36,.07,.19,.97) both}
+/* main body */
+.ci-body{
+  padding:20px 20px 14px;
+  display:flex;gap:18px;align-items:flex-start;
+}
 
-/* shake on hover */
-.box-wrap:hover .box-svg{animation:shakeBox .4s ease}
+/* avatar */
+.ci-av{
+  width:72px;height:72px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Black Han Sans',sans-serif;font-size:26px;color:#fff;
+  position:relative;
+}
+.ci-av::after{
+  content:'';position:absolute;inset:0;border-radius:12px;
+  border:1.5px solid rgba(255,255,255,.1);
+}
 
-/* tap prompt */
-.tap-prompt{font-size:13px;color:#444;letter-spacing:1px;margin-bottom:28px;
-            animation:pulse 2s infinite ease}
-.tap-prompt span{color:var(--red)}
+/* info */
+.ci-info{flex:1;min-width:0}
+.ci-member-lbl{font-size:8px;font-weight:700;color:#666;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
+.ci-name{
+  font-family:'Black Han Sans',sans-serif;
+  font-size:clamp(20px,5vw,26px);
+  color:#fff;line-height:1.1;margin-bottom:8px;
+  word-break:break-word;
+}
+.ci-badge{
+  display:inline-block;
+  padding:4px 12px;border-radius:20px;
+  font-size:10px;font-weight:700;
+  background:rgba(233,69,96,.12);
+  border:1px solid rgba(233,69,96,.35);
+  color:#e94560;margin-bottom:10px;
+  font-family:'Space Mono',monospace;
+}
+.ci-goal-lbl{font-size:8px;font-weight:700;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
+.ci-goal{font-size:11px;color:#aaaaaa;line-height:1.5;font-style:italic}
 
-.open-btn{padding:16px 48px;background:var(--red);border:none;border-radius:14px;
-          font-size:15px;font-weight:700;color:var(--white);cursor:pointer;
-          font-family:'Space Mono',monospace;letter-spacing:1px;
-          animation:fadeDown .8s .4s ease both;transition:transform .15s,opacity .15s}
-.open-btn:active{transform:scale(.97);opacity:.9}
+/* java facts strip */
+.ci-java-strip{
+  display:flex;gap:0;
+  border-top:1px solid #0f0f1e;
+  border-bottom:1px solid #0f0f1e;
+  margin:0;
+}
+.ci-java-fact{
+  flex:1;padding:10px 6px;text-align:center;
+  border-right:1px solid #0f0f1e;
+}
+.ci-java-fact:last-child{border-right:none}
+.cjf-val{font-size:13px;font-weight:700;color:#e94560;font-family:'Space Mono',monospace;margin-bottom:2px}
+.cjf-lbl{font-size:8px;color:#777;letter-spacing:.5px;text-transform:uppercase}
 
-/* ══════════════════════════════════════════════
-   SCREEN 2 — SMASH
-══════════════════════════════════════════════ */
-#s-smash{background:var(--bg);overflow:hidden}
+/* bottom row */
+.ci-bottom{padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+.ci-id-block .lbl{font-size:7px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
+.ci-id-block .val{font-size:12px;font-weight:700;color:#ffffff;font-family:'Space Mono',monospace;letter-spacing:1px}
+.ci-date-block{text-align:right}
+.ci-date-block .lbl{font-size:7px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
+.ci-date-block .val{font-size:11px;color:#ffffff;font-family:'Space Mono',monospace}
 
-.smash-arena{position:relative;width:280px;height:360px;margin:0 auto}
+/* barcode */
+.ci-barcode{
+  padding:8px 20px 12px;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  border-top:1px solid #0a0a14;
+}
+.ci-bars{display:flex;align-items:flex-end;gap:1.5px;height:24px}
+.ci-bar{border-radius:1px}
+.ci-bc-id{font-size:7px;color:#555;letter-spacing:3px;font-family:'Space Mono',monospace}
 
-/* box pieces flying */
-.piece{position:absolute;font-size:40px;opacity:0}
-.piece.fly{animation:flyPiece .8s cubic-bezier(.36,.07,.19,.97) both}
+/* valid strip at very bottom */
+.ci-valid{
+  background:#050510;
+  padding:6px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-top:1px solid #0f0f1e;
+}
+.ci-valid-text{font-size:8px;color:#555;letter-spacing:1px;font-family:'Space Mono',monospace}
+.ci-valid-tag{font-size:8px;font-weight:700;color:#e94560;letter-spacing:1px}
 
-/* big smash text */
-.smash-text{font-family:'Black Han Sans',sans-serif;font-size:72px;color:var(--white);
-            opacity:0;margin-top:20px;letter-spacing:4px}
-.smash-text.on{animation:smashReveal .4s .5s ease both}
+/* ── ACTIONS ── */
+.action-row{display:flex;gap:10px;width:100%;max-width:420px;margin-top:18px;animation:fd .4s .5s ease both}
+.dl-btn{flex:2;padding:14px;background:var(--red);border:none;border-radius:12px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:'Space Mono',monospace;transition:transform .15s,opacity .15s}
+.dl-btn:active{transform:scale(.97)}
+.dl-btn:disabled{opacity:.5;pointer-events:none}
+.again-btn{flex:1;padding:14px;background:transparent;border:1.5px solid var(--border);border-radius:12px;font-size:13px;color:#333;cursor:pointer;font-family:'Space Mono',monospace;transition:all .15s}
+.again-btn:hover{border-color:var(--red);color:var(--red)}
+.share-hint{font-size:12px;color:#1a1a2e;margin-top:14px;line-height:1.9;animation:fd .4s .6s ease both}
+.share-hint strong{color:var(--red)}
 
-.smash-sub{font-size:13px;color:#555;opacity:0;margin-top:8px}
-.smash-sub.on{animation:fadeDown .4s .9s ease both}
+/* loader */
+#loader{position:fixed;inset:0;background:#080810f0;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:16px}
+#loader.on{display:flex}
+.ring{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:spin .7s linear infinite}
+.ring-txt{font-size:12px;color:#222;letter-spacing:1px}
 
-/* ══════════════════════════════════════════════
-   SCREEN 3 — PICK YOUR GIFT
-══════════════════════════════════════════════ */
-#s-pick{background:var(--bg);align-items:center;justify-content:flex-start;
-        padding-top:48px;padding-bottom:40px}
-
-.pick-label{font-size:11px;color:var(--red);letter-spacing:3px;font-weight:700;
-            text-transform:uppercase;margin-bottom:10px}
-.pick-title{font-family:'Black Han Sans',sans-serif;font-size:clamp(36px,9vw,56px);
-            color:var(--white);line-height:1.1;margin-bottom:6px}
-.pick-title span{color:var(--red)}
-.pick-sub{font-size:13px;color:#555;margin-bottom:28px;line-height:1.6}
-
-.gifts-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:400px;margin-bottom:20px}
-
-.gift-card{border-radius:16px;border:1.5px solid var(--border);background:var(--card);
-           padding:20px 14px;cursor:pointer;transition:all .2s;text-align:left;
-           position:relative;overflow:hidden}
-.gift-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
-                   border-radius:16px 16px 0 0}
-.gift-card:nth-child(1)::before{background:var(--red)}
-.gift-card:nth-child(2)::before{background:var(--amber)}
-.gift-card:nth-child(3)::before{background:var(--green)}
-.gift-card:nth-child(4)::before{background:var(--blue)}
-
-.gift-card:hover{transform:translateY(-3px);border-color:#333}
-.gift-card:active{transform:scale(.98)}
-
-.gc-icon{font-size:32px;margin-bottom:10px;display:block}
-.gc-title{font-size:13px;font-weight:700;color:var(--white);margin-bottom:4px;line-height:1.3}
-.gc-desc{font-size:11px;color:#555;line-height:1.5}
-
-/* staggered entrance */
-.gift-card:nth-child(1){animation:popIn .5s .1s ease both}
-.gift-card:nth-child(2){animation:popIn .5s .2s ease both}
-.gift-card:nth-child(3){animation:popIn .5s .3s ease both}
-.gift-card:nth-child(4){animation:popIn .5s .4s ease both}
-
-/* ══════════════════════════════════════════════
-   SCREEN 4 — GIFT CONTENT
-══════════════════════════════════════════════ */
-#s-gift{background:var(--bg);align-items:center;justify-content:flex-start;
-        padding-top:36px;padding-bottom:40px}
-
-.gift-header{width:100%;max-width:420px;margin-bottom:20px;text-align:left}
-.back-btn{font-size:12px;color:#444;cursor:pointer;margin-bottom:12px;display:inline-flex;
-          align-items:center;gap:6px;font-family:'Space Mono',monospace}
-.back-btn:hover{color:var(--red)}
-.gh-tag{font-size:10px;font-weight:700;color:var(--red);letter-spacing:2px;
-        text-transform:uppercase;margin-bottom:6px}
-.gh-title{font-family:'Black Han Sans',sans-serif;font-size:clamp(30px,8vw,46px);
-          color:var(--white);line-height:1.1;margin-bottom:4px}
-.gh-sub{font-size:12px;color:#444;line-height:1.6}
-
-.gift-content{width:100%;max-width:420px}
-
-/* ── roadmap items ── */
-.roadmap-item{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;
-              border-radius:12px;background:var(--card);border:1px solid var(--border);
-              margin-bottom:8px;animation:slideIn .4s ease both}
-.ri-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;
-        justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;
-        font-family:'Space Mono',monospace}
-.ri-body{flex:1}
-.ri-phase{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px}
-.ri-title{font-size:13px;font-weight:700;color:var(--white);margin-bottom:2px}
-.ri-topics{font-size:11px;color:#555;line-height:1.5}
-
-/* ── resource links ── */
-.resource-item{display:flex;align-items:center;gap:12px;padding:14px 16px;
-               border-radius:12px;background:var(--card);border:1px solid var(--border);
-               margin-bottom:8px;cursor:pointer;text-decoration:none;
-               transition:border-color .15s;animation:slideIn .4s ease both}
-.resource-item:hover{border-color:#333}
-.ri-icon{font-size:24px;flex-shrink:0}
-.ri-info{flex:1;text-align:left}
-.ri-name{font-size:13px;font-weight:700;color:var(--white);margin-bottom:2px}
-.ri-desc{font-size:11px;color:#555}
-.ri-arrow{font-size:14px;color:#333}
-
-/* ── tricky questions ── */
-.question-item{padding:14px 16px;border-radius:12px;background:var(--card);
-               border:1px solid var(--border);margin-bottom:8px;text-align:left;
-               animation:slideIn .4s ease both}
-.qi-num{font-size:10px;font-weight:700;color:var(--red);letter-spacing:1px;margin-bottom:6px}
-.qi-q{font-size:13px;color:var(--white);font-weight:700;margin-bottom:6px;line-height:1.5}
-.qi-code{background:#080810;border:1px solid #1a1a1a;border-radius:6px;
-         padding:8px 10px;font-family:'Space Mono',monospace;font-size:11px;
-         color:#888;margin-bottom:8px;line-height:1.7}
-.qi-toggle{font-size:11px;color:var(--red);cursor:pointer;font-weight:700;
-           font-family:'Space Mono',monospace}
-.qi-ans{font-size:12px;color:var(--green);margin-top:6px;line-height:1.5;display:none}
-
-/* ── tips ── */
-.tip-item{padding:14px 16px;border-radius:12px;background:var(--card);
-          border:1px solid var(--border);margin-bottom:8px;text-align:left;
-          animation:slideIn .4s ease both;border-left:3px solid}
-.tip-item:nth-child(1){border-left-color:var(--red)}
-.tip-item:nth-child(2){border-left-color:var(--amber)}
-.tip-item:nth-child(3){border-left-color:var(--green)}
-.tip-item:nth-child(4){border-left-color:var(--blue)}
-.tip-item:nth-child(5){border-left-color:var(--purple)}
-.tip-title{font-size:13px;font-weight:700;color:var(--white);margin-bottom:4px}
-.tip-body{font-size:12px;color:#666;line-height:1.6}
-
-/* stagger delays */
-.gift-content>*:nth-child(1){animation-delay:.05s}
-.gift-content>*:nth-child(2){animation-delay:.1s}
-.gift-content>*:nth-child(3){animation-delay:.15s}
-.gift-content>*:nth-child(4){animation-delay:.2s}
-.gift-content>*:nth-child(5){animation-delay:.25s}
-.gift-content>*:nth-child(6){animation-delay:.3s}
-.gift-content>*:nth-child(7){animation-delay:.35s}
-.gift-content>*:nth-child(8){animation-delay:.4s}
-
-.bottom-cta{width:100%;max-width:420px;margin-top:20px;padding:16px;
-            background:var(--red);border:none;border-radius:14px;font-size:14px;
-            font-weight:700;color:var(--white);cursor:pointer;
-            font-family:'Space Mono',monospace;letter-spacing:.5px}
-.tagline-footer{font-size:11px;color:#222;margin-top:14px;font-family:'Space Mono',monospace}
-
-/* ══════════════════════════════════════════════
-   KEYFRAMES
-══════════════════════════════════════════════ */
-@keyframes fadeDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:none}}
-@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
-@keyframes shakeBox{0%,100%{transform:none}20%{transform:rotate(-4deg) scale(1.04)}
-  40%{transform:rotate(4deg)}60%{transform:rotate(-3deg)}80%{transform:rotate(2deg)}}
-@keyframes dumbbellDrop{
-  0%{opacity:1;transform:translateX(-50%) translateY(-60px) rotate(-20deg)}
-  60%{transform:translateX(-50%) translateY(10px) rotate(5deg)}
-  80%{transform:translateX(-50%) translateY(-8px) rotate(-2deg)}
-  100%{opacity:1;transform:translateX(-50%) translateY(0) rotate(0deg)}}
-@keyframes smashReveal{
-  0%{opacity:0;transform:scale(1.6)}50%{transform:scale(.95)}100%{opacity:1;transform:scale(1)}}
-@keyframes popIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
-@keyframes slideIn{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
-@keyframes flyPiece{
-  0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}
-  100%{opacity:0;transform:var(--fly-dest) rotate(var(--fly-rot)) scale(.3)}}
-@keyframes particleFade{from{opacity:.8}to{opacity:0}}
-
-/* ══════════════════════════════════════════════
-   CONFETTI PARTICLES
-══════════════════════════════════════════════ */
-.confetti{position:fixed;pointer-events:none;z-index:999;font-size:20px;
-          animation:confettiFall 1.2s ease both}
-@keyframes confettiFall{
-  0%{opacity:1;transform:translateY(0) rotate(0deg)}
-  100%{opacity:0;transform:translateY(200px) rotate(720deg)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fd{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
 </style>
 </head>
 <body>
+<canvas id="pcvs"></canvas>
+<div id="loader"><div class="ring"></div><div class="ring-txt">Generating your card...</div></div>
 
-<canvas id="canvas"></canvas>
-
-<!-- ═══ SCREEN 1 : WELCOME ═══ -->
-<div class="screen on" id="s-welcome">
-  <div class="handle-tag">java__gym · welcome gift</div>
-
-  <div class="welcome-title">Welcome to<br><span>The Gym.</span></div>
-  <p class="welcome-sub">You just joined the most intense<br>Java training ground on Instagram.<br>We got something for you.</p>
-
-  <!-- Gift box SVG -->
-  <div class="box-wrap" id="boxWrap">
-    <!-- dumbbell that drops -->
-    <svg class="dumbbell-svg" id="dumbbell" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="42" y="10" width="16" height="80" rx="8" fill="#e94560"/>
-      <rect x="20" y="22" width="60" height="18" rx="6" fill="#c73652"/>
-      <rect x="20" y="60" width="60" height="18" rx="6" fill="#c73652"/>
-      <rect x="8"  y="18" width="20" height="26" rx="5" fill="#e94560"/>
-      <rect x="72" y="18" width="20" height="26" rx="5" fill="#e94560"/>
-      <rect x="8"  y="56" width="20" height="26" rx="5" fill="#e94560"/>
-      <rect x="72" y="56" width="20" height="26" rx="5" fill="#e94560"/>
-    </svg>
-
-    <!-- gift box SVG -->
-    <svg class="box-svg" id="boxSvg" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- box shadow -->
-      <ellipse cx="110" cy="210" rx="80" ry="8" fill="#000" opacity=".4"/>
-      <!-- box body -->
-      <rect x="30" y="110" width="160" height="96" rx="8" fill="#1a1a2e"/>
-      <rect x="30" y="110" width="160" height="96" rx="8" fill="none" stroke="#e94560" stroke-width="2"/>
-      <!-- box lid -->
-      <rect x="22" y="90" width="176" height="28" rx="6" fill="#e94560"/>
-      <!-- lid ribbon vertical -->
-      <rect x="101" y="88" width="18" height="32" rx="4" fill="#c73652"/>
-      <!-- box ribbon vertical -->
-      <rect x="101" y="110" width="18" height="98" rx="0" fill="#c73652" opacity=".5"/>
-      <!-- box ribbon horizontal -->
-      <rect x="30" y="148" width="160" height="12" rx="0" fill="#c73652" opacity=".5"/>
-      <!-- bow left loop -->
-      <ellipse cx="88" cy="74" rx="22" ry="16" fill="#e94560" transform="rotate(-20 88 74)"/>
-      <ellipse cx="88" cy="74" rx="14" ry="10" fill="#c73652" transform="rotate(-20 88 74)"/>
-      <!-- bow right loop -->
-      <ellipse cx="132" cy="74" rx="22" ry="16" fill="#e94560" transform="rotate(20 132 74)"/>
-      <ellipse cx="132" cy="74" rx="14" ry="10" fill="#c73652" transform="rotate(20 132 74)"/>
-      <!-- bow centre -->
-      <circle cx="110" cy="80" r="10" fill="#e94560"/>
-      <circle cx="110" cy="80" r="6"  fill="#fff" opacity=".2"/>
-      <!-- question mark on box -->
-      <text x="110" y="168" text-anchor="middle" font-family="'Space Mono',monospace"
-            font-size="42" font-weight="700" fill="#e94560" opacity=".6">?</text>
-    </svg>
-  </div>
-
-  <p class="tap-prompt"><span>Tap the box</span> to smash it open</p>
-  <button class="open-btn" onclick="startSmash()">SMASH IT OPEN 🏋️</button>
-</div>
-
-<!-- ═══ SCREEN 2 : SMASH ANIMATION ═══ -->
-<div class="screen" id="s-smash">
-  <div class="smash-arena" id="smashArena">
-    <!-- pieces injected by JS -->
-  </div>
-  <div class="smash-text" id="smashText">SMASH!</div>
-  <div class="smash-sub" id="smashSub">Your gift is inside...</div>
-</div>
-
-<!-- ═══ SCREEN 3 : PICK YOUR GIFT ═══ -->
-<div class="screen" id="s-pick">
-  <div class="pick-label">Your welcome gift</div>
-  <div class="pick-title">Pick your<br><span>surprise.</span></div>
-  <p class="pick-sub">4 gifts inside the box.<br>Pick any one — or all of them.</p>
-
-  <div class="gifts-grid">
-    <div class="gift-card" onclick="openGift('roadmap')">
-      <span class="gc-icon">🗺️</span>
-      <div class="gc-title">Java Roadmap</div>
-      <div class="gc-desc">Complete phase-by-phase training plan</div>
+<!-- ══ FORM ══ -->
+<div class="screen on" id="s-form">
+  <div class="eyebrow">java__gym · official</div>
+  <div class="big-title">Get Your<br><span>Membership</span><br>Card.</div>
+  <p class="form-sub">Fill in · Download · Post to story · Flex.</p>
+  <div class="form-box">
+    <div class="av-preview">
+      <div class="av-chip" id="avChip">?</div>
+      <div>
+        <div class="av-name-p" id="avName">Your name</div>
+        <div class="av-sub-p" id="avSub">Member of java__gym</div>
+      </div>
     </div>
-    <div class="gift-card" onclick="openGift('resources')">
-      <span class="gc-icon">📚</span>
-      <div class="gc-title">Best Resources</div>
-      <div class="gc-desc">Free tools, docs & sites to learn Java</div>
+    <div class="field">
+      <label>Full name</label>
+      <input type="text" id="f-name" placeholder="e.g. Rahul Sharma" maxlength="24" oninput="lp()">
     </div>
-    <div class="gift-card" onclick="openGift('questions')">
-      <span class="gc-icon">🧠</span>
-      <div class="gc-title">5 Tricky Questions</div>
-      <div class="gc-desc">Test yourself right now — can you get 5/5?</div>
+    <div class="field">
+      <label>Your status</label>
+      <select id="f-status" onchange="lp()">
+        <option value="" disabled selected>Select your status</option>
+        <option>Student</option>
+        <option>Fresher (0-1 year)</option>
+        <option>Software Engineer</option>
+        <option>Working Professional</option>
+        <option>Career Switcher</option>
+        <option>Java Enthusiast</option>
+      </select>
     </div>
-    <div class="gift-card" onclick="openGift('tips')">
-      <span class="gc-icon">💡</span>
-      <div class="gc-title">Pro Tips</div>
-      <div class="gc-desc">5 things every Java beginner must know</div>
+    <div class="field">
+      <label>What do you want from java__gym? <span class="opt-tag">(optional)</span></label>
+      <textarea id="f-goal" placeholder="e.g. Crack a product company, clear placements, learn Java from scratch..." maxlength="80"></textarea>
     </div>
+    <button class="gen-btn" onclick="gen()">GENERATE MY CARD</button>
   </div>
 </div>
 
-<!-- ═══ SCREEN 4 : GIFT CONTENT ═══ -->
-<div class="screen" id="s-gift">
-  <div class="gift-header">
-    <div class="back-btn" onclick="goBack()">← back to gifts</div>
-    <div class="gh-tag" id="gTag"></div>
-    <div class="gh-title" id="gTitle"></div>
-    <div class="gh-sub" id="gSub"></div>
+<!-- ══ CARD SCREEN ══ -->
+<div class="screen" id="s-card">
+  <div class="card-label">Your membership card is ready</div>
+  <div class="card-welcome">Welcome to<br><span>Java Gym.</span></div>
+  <p class="card-caption">You are officially a member. Now let's train.</p>
+
+  <!-- THE HTML CARD -->
+  <div id="card">
+
+    <!-- red header -->
+    <div class="ci-header">
+      <div class="ci-gym-name">JAVA__GYM</div>
+      <div class="ci-right-tag">
+        <span class="t1">Official Membership</span>
+        <span class="t2">@java__gym · Est. 2024</span>
+      </div>
+    </div>
+
+    <!-- java code decoration strip -->
+    <div class="ci-code-strip">
+      <span class="kw">public class</span>&nbsp;
+      <span class="fn">JavaGym</span>&nbsp;{&nbsp;&nbsp;
+      <span class="kw">void</span>&nbsp;<span class="fn">train</span>()&nbsp;{&nbsp;&nbsp;
+      <span class="str">"No skipping. No excuses."</span>&nbsp;}&nbsp;&nbsp;
+      <span class="kw">static void</span>&nbsp;<span class="fn">main</span>(String[] args)&nbsp;{&nbsp;
+      <span class="fn">new</span>&nbsp;JavaGym().<span class="fn">train</span>();&nbsp;}&nbsp;}
+    </div>
+
+    <!-- body -->
+    <div class="ci-body">
+      <div class="ci-av" id="ci-av"></div>
+      <div class="ci-info">
+        <div class="ci-member-lbl">Member</div>
+        <div class="ci-name" id="ci-name">—</div>
+        <div class="ci-badge" id="ci-badge">—</div>
+        <div class="ci-goal-lbl">Training Goal</div>
+        <div class="ci-goal" id="ci-goal">—</div>
+      </div>
+    </div>
+
+    <!-- java facts strip -->
+    <div class="ci-java-strip">
+      <div class="ci-java-fact">
+        <div class="cjf-val">JVM</div>
+        <div class="cjf-lbl">Platform</div>
+      </div>
+      <div class="ci-java-fact">
+        <div class="cjf-val">OOP</div>
+        <div class="cjf-lbl">Paradigm</div>
+      </div>
+      <div class="ci-java-fact">
+        <div class="cjf-val">3B+</div>
+        <div class="cjf-lbl">Devices</div>
+      </div>
+      <div class="ci-java-fact">
+        <div class="cjf-val">100</div>
+        <div class="cjf-lbl">Day Plan</div>
+      </div>
+      <div class="ci-java-fact">
+        <div class="cjf-val">0</div>
+        <div class="cjf-lbl">Skips</div>
+      </div>
+    </div>
+
+    <!-- bottom row -->
+    <div class="ci-bottom">
+      <div class="ci-id-block">
+        <div class="lbl">Member ID</div>
+        <div class="val" id="ci-id">JG-2024-00000</div>
+      </div>
+      <div class="ci-date-block">
+        <div class="lbl">Joined</div>
+        <div class="val" id="ci-date">—</div>
+      </div>
+    </div>
+
+    <!-- barcode -->
+    <div class="ci-barcode">
+      <div class="ci-bars" id="ci-bars"></div>
+      <div class="ci-bc-id" id="ci-bc-id">JG-2024-00000</div>
+    </div>
+
+    <!-- valid strip -->
+    <div class="ci-valid">
+      <div class="ci-valid-text">Valid for 100 days of training · Non-transferable · No skipping allowed</div>
+      <div class="ci-valid-tag">ACTIVE</div>
+    </div>
+
+  </div><!-- #card -->
+
+  <div class="action-row">
+    <button class="dl-btn" id="dlBtn" onclick="dlCard()">⬇ Save as Image</button>
+    <button class="again-btn" onclick="ss('s-form')">← Back</button>
   </div>
-  <div class="gift-content" id="gContent"></div>
-  <button class="bottom-cta" onclick="showScreen('s-pick')">← Pick Another Gift</button>
-  <div class="tagline-footer">// Your Java workout starts here · @java__gym</div>
+  <p class="share-hint">
+    Post to story · tag <strong>@java__gym</strong><br>
+    We feature the best cards every week! 🔥
+  </p>
 </div>
 
 <script>
-/* ── CANVAS PARTICLES ──────────────────────── */
-const canvas=document.getElementById('canvas');
-const ctx=canvas.getContext('2d');
-let W=canvas.width=window.innerWidth;
-let H=canvas.height=window.innerHeight;
-window.addEventListener('resize',()=>{W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;});
+/* particles */
+const pc=document.getElementById('pcvs'),px=pc.getContext('2d');
+let PW,PH;function rsz(){PW=pc.width=innerWidth;PH=pc.height=innerHeight}rsz();
+window.addEventListener('resize',rsz);
+const PP=['#e9456012','#f5a62310','#27ae6010','#3a86ff10'];
+const pa=Array.from({length:50},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.5+.4,vx:(Math.random()-.5)*.18,vy:(Math.random()-.5)*.18,c:PP[Math.floor(Math.random()*PP.length)]}));
+(function pl(){px.clearRect(0,0,PW,PH);pa.forEach(p=>{px.beginPath();px.arc(p.x,p.y,p.r,0,Math.PI*2);px.fillStyle=p.c;px.fill();p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>PW)p.vx*=-1;if(p.y<0||p.y>PH)p.vy*=-1;});requestAnimationFrame(pl);})();
 
-const COLS=['#e94560','#f5a623','#27ae60','#3a86ff','#a855f7'];
-const particles=[];
-for(let i=0;i<60;i++){
-  particles.push({
-    x:Math.random()*W, y:Math.random()*H,
-    r:Math.random()*1.5+.5,
-    vx:(Math.random()-.5)*.3, vy:(Math.random()-.5)*.3,
-    col:COLS[Math.floor(Math.random()*COLS.length)],
-    a:Math.random()*.4+.1
+/* avatar helpers */
+const AVC=['#e94560','#f5a623','#27ae60','#3a86ff','#a855f7','#0f3460','#c73652','#0d6e56'];
+function pcol(n){let h=0;for(const c of n)h=(h<<5)-h+c.charCodeAt(0);return AVC[Math.abs(h)%AVC.length]}
+function ini(n){const p=n.trim().split(/\s+/);if(!p[0])return'?';return p.length===1?p[0][0].toUpperCase():(p[0][0]+p[p.length-1][0]).toUpperCase()}
+
+function lp(){
+  const n=document.getElementById('f-name').value||'Your name';
+  const s=document.getElementById('f-status').value||'Member of java__gym';
+  const ch=document.getElementById('avChip');
+  ch.textContent=ini(n);ch.style.background=pcol(n);
+  document.getElementById('avName').textContent=n;
+  document.getElementById('avSub').textContent=s;
+}
+
+function ss(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');window.scrollTo(0,0);}
+
+function gen(){
+  const name=document.getElementById('f-name').value.trim();
+  const status=document.getElementById('f-status').value;
+  const goal=document.getElementById('f-goal').value.trim();
+  if(!name){alert('Please enter your name!');return;}
+  if(!status){alert('Please select your status!');return;}
+  document.getElementById('loader').classList.add('on');
+  setTimeout(()=>{buildCard(name,status,goal);document.getElementById('loader').classList.remove('on');ss('s-card');},600);
+}
+
+function buildCard(name,status,goal){
+  const col=pcol(name);
+  const mid='JG-'+new Date().getFullYear()+'-'+Math.floor(10000+Math.random()*90000);
+  const now=new Date();
+  const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const ds=mo[now.getMonth()]+' '+now.getDate()+', '+now.getFullYear();
+
+  /* avatar */
+  const av=document.getElementById('ci-av');
+  av.textContent=ini(name);
+  av.style.background=col;
+  av.style.fontSize=ini(name).length===2?'22px':'28px';
+
+  document.getElementById('ci-name').textContent=name;
+  document.getElementById('ci-badge').textContent=status;
+  document.getElementById('ci-goal').textContent=goal||'Training hard. No days off. No excuses.';
+  document.getElementById('ci-id').textContent=mid;
+  document.getElementById('ci-date').textContent=ds;
+  document.getElementById('ci-bc-id').textContent=mid;
+
+  /* barcode */
+  const barsEl=document.getElementById('ci-bars');
+  barsEl.innerHTML='';
+  const seq=[3,1,2,1,4,2,1,3,1,2,1,4,1,3,2,1,2,1,4,1,2,3,1,1,2,3,1,2,1,4];
+  seq.forEach((w,i)=>{
+    const b=document.createElement('div');
+    b.className='ci-bar';
+    const h=10+((i*6+w*4)%14);
+    b.style.cssText=`width:${w*2.6}px;height:${h}px;background:${i%3===0?'#1e1e2e':'#111120'}`;
+    barsEl.appendChild(b);
   });
 }
-function drawParticles(){
-  ctx.clearRect(0,0,W,H);
-  particles.forEach(p=>{
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    ctx.fillStyle=p.col;
-    ctx.globalAlpha=p.a;
-    ctx.fill();
-    p.x+=p.vx; p.y+=p.vy;
-    if(p.x<0||p.x>W) p.vx*=-1;
-    if(p.y<0||p.y>H) p.vy*=-1;
+
+function dlCard(){
+  const btn=document.getElementById('dlBtn');
+  btn.disabled=true;btn.textContent='Saving...';
+  /* Use html2canvas to capture the card as it appears */
+  html2canvas(document.getElementById('card'),{
+    scale:3,
+    backgroundColor:'#0a0a14',
+    useCORS:true,
+    allowTaint:true,
+    logging:false,
+    onclone:(doc)=>{
+      /* ensure fonts loaded in clone */
+      const card=doc.getElementById('card');
+      if(card)card.style.borderRadius='18px';
+    }
+  }).then(canvas=>{
+    const url=canvas.toDataURL('image/png',1.0);
+    const a=document.createElement('a');
+    a.href=url;a.download='java__gym_membership.png';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    btn.disabled=false;btn.textContent='⬇ Save as Image';
+  }).catch(()=>{
+    /* fallback */
+    btn.disabled=false;btn.textContent='⬇ Save as Image';
+    alert('On mobile: long-press the card and choose Save Image!');
   });
-  ctx.globalAlpha=1;
-  requestAnimationFrame(drawParticles);
-}
-drawParticles();
-
-/* ── SCREENS ───────────────────────────────── */
-function showScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
-  document.getElementById(id).classList.add('on');
-  window.scrollTo(0,0);
-}
-
-/* ── SMASH SEQUENCE ────────────────────────── */
-function startSmash(){
-  const db=document.getElementById('dumbbell');
-  db.classList.add('drop');
-  setTimeout(()=>{
-    showScreen('s-smash');
-    buildSmash();
-  },400);
-}
-
-function buildSmash(){
-  const arena=document.getElementById('smashArena');
-  arena.innerHTML='';
-  const pieces=['📦','🟥','🟧','📫','💥','⬛','🟫','📪'];
-  const dests=[
-    'translate(-120px,-80px)','translate(120px,-80px)',
-    'translate(-160px,40px)','translate(160px,40px)',
-    'translate(-80px,-140px)','translate(80px,-140px)',
-    'translate(-140px,100px)','translate(100px,110px)'
-  ];
-  pieces.forEach((p,i)=>{
-    const el=document.createElement('div');
-    el.className='piece';
-    el.textContent=p;
-    el.style.cssText=`left:50%;top:50%;transform:translate(-50%,-50%);
-      --fly-dest:${dests[i]};--fly-rot:${(i%2?1:-1)*Math.floor(Math.random()*360+180)}deg`;
-    arena.appendChild(el);
-    setTimeout(()=>el.classList.add('fly'),50);
-  });
-
-  // dumbbell in arena
-  const db2=document.createElement('div');
-  db2.style.cssText='position:absolute;top:20px;left:50%;transform:translateX(-50%);font-size:64px;animation:dumbbellDrop .3s ease both';
-  db2.textContent='🏋️';
-  arena.appendChild(db2);
-
-  // SMASH text
-  setTimeout(()=>{
-    document.getElementById('smashText').classList.add('on');
-  },500);
-  setTimeout(()=>{
-    document.getElementById('smashSub').classList.add('on');
-    spawnConfetti();
-  },900);
-  setTimeout(()=>showScreen('s-pick'),2000);
-}
-
-function spawnConfetti(){
-  const icons=['🎉','⭐','🔥','💥','✨','🏆','💪','☕'];
-  for(let i=0;i<20;i++){
-    setTimeout(()=>{
-      const el=document.createElement('div');
-      el.className='confetti';
-      el.textContent=icons[Math.floor(Math.random()*icons.length)];
-      el.style.cssText=`left:${Math.random()*100}vw;top:${Math.random()*40}vh;
-        font-size:${16+Math.random()*20}px;animation-delay:${Math.random()*.5}s`;
-      document.body.appendChild(el);
-      setTimeout(()=>el.remove(),1400);
-    },i*60);
-  }
-}
-
-/* ── GIFT DATA ─────────────────────────────── */
-const GIFTS={
-
-  roadmap:{
-    tag:'Java Roadmap',
-    title:'Your Training\nBible.',
-    sub:'5 phases · 0 skips · 100 days. This is how you go from zero to hired.',
-    render:()=>`
-      ${[
-        {phase:'Phase 1',col:'#e94560',label:'Foundations',days:'Days 1–20',
-         topics:'JVM · JDK · JRE · Data Types · Operators · Loops · Arrays · Strings'},
-        {phase:'Phase 2',col:'#f5a623',label:'OOP — The Protein',days:'Days 21–40',
-         topics:'Classes · Objects · Inheritance · Polymorphism · Abstraction · Encapsulation'},
-        {phase:'Phase 3',col:'#3a86ff',label:'Advanced Java',days:'Days 41–60',
-         topics:'Collections · Generics · Exceptions · Lambdas · Streams · Multithreading'},
-        {phase:'Phase 4',col:'#27ae60',label:'DSA in Java',days:'Days 61–80',
-         topics:'Arrays · LinkedList · Stack · Queue · Trees · Graphs · Sorting · DP'},
-        {phase:'Phase 5',col:'#a855f7',label:'Interview Ready',days:'Days 81–100',
-         topics:'Spring Boot · JPA · Design Patterns · JVM Internals · System Design'},
-      ].map((r,i)=>`
-        <div class="roadmap-item" style="animation-delay:${i*.08}s">
-          <div class="ri-num" style="background:${r.col}22;color:${r.col}">${i+1}</div>
-          <div class="ri-body">
-            <div class="ri-phase" style="color:${r.col}">${r.phase} · ${r.days}</div>
-            <div class="ri-title">${r.label}</div>
-            <div class="ri-topics">${r.topics}</div>
-          </div>
-        </div>`).join('')}`
-  },
-
-  resources:{
-    tag:'Best Resources',
-    title:'Free Tools\nThat Slap.',
-    sub:'Hand-picked. All free. Everything you need to go from zero to interview-ready.',
-    render:()=>`
-      ${[
-        {icon:'📖',name:'Official Java Docs',desc:'docs.oracle.com — the source of truth',url:'https://docs.oracle.com/en/java/'},
-        {icon:'🎓',name:'CS50 Java Track',desc:'Harvard free course — best for beginners',url:'https://cs50.harvard.edu'},
-        {icon:'💻',name:'LeetCode',desc:'DSA practice — start Easy, go Daily',url:'https://leetcode.com'},
-        {icon:'🧑‍💻',name:'GeeksForGeeks Java',desc:'Best concept explanations with examples',url:'https://www.geeksforgeeks.org/java/'},
-        {icon:'🎯',name:'Baeldung',desc:'In-depth Java guides — best for advanced',url:'https://www.baeldung.com'},
-        {icon:'☕',name:'java__gym on Instagram',desc:'Daily Java training — free forever',url:'https://instagram.com/java__gym'},
-      ].map((r,i)=>`
-        <a class="resource-item" href="${r.url}" target="_blank" style="animation-delay:${i*.08}s">
-          <div class="ri-icon">${r.icon}</div>
-          <div class="ri-info">
-            <div class="ri-name">${r.name}</div>
-            <div class="ri-desc">${r.desc}</div>
-          </div>
-          <div class="ri-arrow">→</div>
-        </a>`).join('')}`
-  },
-
-  questions:{
-    tag:'5 Tricky Questions',
-    title:'Can You Get\n5 out of 5?',
-    sub:'Most people fail at least 2. Tap "Reveal" to see the answer.',
-    render:()=>`
-      ${[
-        {q:'What is the output?',
-         code:'String s = "Hello";\ns.concat(" World");\nSystem.out.println(s.length());',
-         ans:'5 — String is immutable. concat() returns a new String but nobody captured it. s still points to "Hello".'},
-        {q:'What does this print?',
-         code:'Integer a = 127, b = 127;\nInteger c = 128, d = 128;\nSystem.out.println(a==b);\nSystem.out.println(c==d);',
-         ans:'true / false — Java caches Integer from -128 to 127. a==b uses the same cached object. 128 is not cached so c and d are different objects.'},
-        {q:'What is the output?',
-         code:'try {\n  System.out.print("A");\n  return;\n} finally {\n  System.out.print("B");\n}',
-         ans:'AB — finally ALWAYS runs even with a return in try. The return is paused, finally runs, then method returns.'},
-        {q:'What is the final value of x?',
-         code:'int x = 5;\nx = x++;\nSystem.out.println(x);',
-         ans:'5 — x++ returns current value (5) then increments. But x= overwrites it back to 5. Use ++x to get 6.'},
-        {q:'What exception is thrown?',
-         code:'List<String> list =\n  Arrays.asList("a","b","c");\nlist.add("d");',
-         ans:'UnsupportedOperationException — Arrays.asList returns a fixed-size list. add() is not allowed. Use new ArrayList<>(Arrays.asList(...)) for a mutable list.'},
-      ].map((q,i)=>`
-        <div class="question-item" style="animation-delay:${i*.08}s">
-          <div class="qi-num">Q${i+1} / 5</div>
-          <div class="qi-q">${q.q}</div>
-          <div class="qi-code">${q.code.replace(/\n/g,'<br>')}</div>
-          <span class="qi-toggle" onclick="toggleAns(this)">Reveal answer →</span>
-          <div class="qi-ans">${q.ans}</div>
-        </div>`).join('')}`
-  },
-
-  tips:{
-    tag:'Pro Tips',
-    title:'5 Things You\nMust Know.',
-    sub:'Most Java beginners waste months not knowing these. You won\'t.',
-    render:()=>`
-      ${[
-        {title:'Never use == to compare Strings',
-         body:'== checks if two references point to the same object. Always use .equals() to compare String content. This bug has broken more interviews than anything else.'},
-        {title:'String is immutable — always',
-         body:'Every String method (concat, toUpperCase, replace) returns a NEW String. The original never changes. If you don\'t capture the return value, the result is gone.'},
-        {title:'ArrayList vs LinkedList',
-         body:'ArrayList = fast random access O(1), slow insert/delete in middle O(n). LinkedList = fast insert/delete O(1), slow random access O(n). Use ArrayList by default — LinkedList is rarely the right choice.'},
-        {title:'The JVM is your best friend',
-         body:'Java runs on JVM (Java Virtual Machine). Your code compiles to bytecode (.class), not machine code. The JVM runs that bytecode on any OS. This is why Java is "Write Once, Run Anywhere."'},
-        {title:'Practice output prediction daily',
-         body:'Every day, pick 1 short Java snippet and predict the output before running it. This one habit will make you dangerous in interviews. We do this every single day at java__gym.'},
-      ].map((t,i)=>`
-        <div class="tip-item" style="animation-delay:${i*.08}s">
-          <div class="tip-title">${t.title}</div>
-          <div class="tip-body">${t.body}</div>
-        </div>`).join('')}`
-  }
-};
-
-/* ── OPEN GIFT ──────────────────────────────── */
-function openGift(key){
-  const g=GIFTS[key];
-  document.getElementById('gTag').textContent=g.tag;
-  document.getElementById('gTitle').innerHTML=g.title.replace('\n','<br>');
-  document.getElementById('gSub').textContent=g.sub;
-  document.getElementById('gContent').innerHTML=g.render();
-  showScreen('s-gift');
-}
-
-function goBack(){showScreen('s-pick');}
-
-function toggleAns(el){
-  const ans=el.nextElementSibling;
-  const open=ans.style.display==='block';
-  ans.style.display=open?'none':'block';
-  el.textContent=open?'Reveal answer →':'Hide answer ↑';
 }
 </script>
 </body>
