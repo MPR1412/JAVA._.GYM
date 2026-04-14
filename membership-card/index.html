@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#0a0a0a">
+<title>Welcome Gift · java__gym</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Space+Mono:wght@400;700&display=swap');
+
+:root{
+  --red:#e94560;
+  --amber:#f5a623;
+  --green:#27ae60;
+  --blue:#3a86ff;
+  --purple:#a855f7;
+  --white:#ffffff;
+  --bg:#080810;
+  --card:#0f0f1a;
+  --border:#1e1e2e;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;min-height:100vh;background:var(--bg);overflow-x:hidden;font-family:'Space Mono',monospace}
+
+/* ── PARTICLE CANVAS ─────────────────────────── */
+#canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+
+/* ── SCREENS ─────────────────────────────────── */
+.screen{display:none;flex-direction:column;align-items:center;justify-content:center;
+        min-height:100vh;padding:24px 20px;position:relative;z-index:1;text-align:center}
+.screen.on{display:flex}
+
+/* ══════════════════════════════════════════════
+   SCREEN 1 — WELCOME
+══════════════════════════════════════════════ */
+#s-welcome{background:var(--bg)}
+
+.handle-tag{font-size:11px;font-weight:700;color:var(--red);letter-spacing:3px;
+            text-transform:uppercase;margin-bottom:16px;
+            animation:fadeDown .6s ease both}
+
+.welcome-title{font-family:'Black Han Sans',sans-serif;font-size:clamp(52px,13vw,88px);
+               line-height:1;color:var(--white);margin-bottom:6px;
+               animation:fadeDown .7s .1s ease both}
+.welcome-title span{color:var(--red)}
+
+.welcome-sub{font-size:14px;color:#555;line-height:1.7;margin-bottom:32px;
+             animation:fadeDown .7s .2s ease both}
+
+/* gift box SVG container */
+.box-wrap{position:relative;width:220px;height:220px;margin:0 auto 32px;cursor:pointer;
+          animation:fadeDown .8s .3s ease both}
+.box-wrap:hover .box-svg{transform:scale(1.04)}
+.box-svg{width:220px;height:220px;transition:transform .3s ease;display:block}
+
+/* dumbbell drop animation */
+.dumbbell-svg{position:absolute;top:-110px;left:50%;transform:translateX(-50%);
+              width:100px;height:100px;opacity:0;pointer-events:none}
+.dumbbell-svg.drop{animation:dumbbellDrop .5s cubic-bezier(.36,.07,.19,.97) both}
+
+/* shake on hover */
+.box-wrap:hover .box-svg{animation:shakeBox .4s ease}
+
+/* tap prompt */
+.tap-prompt{font-size:13px;color:#444;letter-spacing:1px;margin-bottom:28px;
+            animation:pulse 2s infinite ease}
+.tap-prompt span{color:var(--red)}
+
+.open-btn{padding:16px 48px;background:var(--red);border:none;border-radius:14px;
+          font-size:15px;font-weight:700;color:var(--white);cursor:pointer;
+          font-family:'Space Mono',monospace;letter-spacing:1px;
+          animation:fadeDown .8s .4s ease both;transition:transform .15s,opacity .15s}
+.open-btn:active{transform:scale(.97);opacity:.9}
+
+/* ══════════════════════════════════════════════
+   SCREEN 2 — SMASH
+══════════════════════════════════════════════ */
+#s-smash{background:var(--bg);overflow:hidden}
+
+.smash-arena{position:relative;width:280px;height:360px;margin:0 auto}
+
+/* box pieces flying */
+.piece{position:absolute;font-size:40px;opacity:0}
+.piece.fly{animation:flyPiece .8s cubic-bezier(.36,.07,.19,.97) both}
+
+/* big smash text */
+.smash-text{font-family:'Black Han Sans',sans-serif;font-size:72px;color:var(--white);
+            opacity:0;margin-top:20px;letter-spacing:4px}
+.smash-text.on{animation:smashReveal .4s .5s ease both}
+
+.smash-sub{font-size:13px;color:#555;opacity:0;margin-top:8px}
+.smash-sub.on{animation:fadeDown .4s .9s ease both}
+
+/* ══════════════════════════════════════════════
+   SCREEN 3 — PICK YOUR GIFT
+══════════════════════════════════════════════ */
+#s-pick{background:var(--bg);align-items:center;justify-content:flex-start;
+        padding-top:48px;padding-bottom:40px}
+
+.pick-label{font-size:11px;color:var(--red);letter-spacing:3px;font-weight:700;
+            text-transform:uppercase;margin-bottom:10px}
+.pick-title{font-family:'Black Han Sans',sans-serif;font-size:clamp(36px,9vw,56px);
+            color:var(--white);line-height:1.1;margin-bottom:6px}
+.pick-title span{color:var(--red)}
+.pick-sub{font-size:13px;color:#555;margin-bottom:28px;line-height:1.6}
+
+.gifts-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:400px;margin-bottom:20px}
+
+.gift-card{border-radius:16px;border:1.5px solid var(--border);background:var(--card);
+           padding:20px 14px;cursor:pointer;transition:all .2s;text-align:left;
+           position:relative;overflow:hidden}
+.gift-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+                   border-radius:16px 16px 0 0}
+.gift-card:nth-child(1)::before{background:var(--red)}
+.gift-card:nth-child(2)::before{background:var(--amber)}
+.gift-card:nth-child(3)::before{background:var(--green)}
+.gift-card:nth-child(4)::before{background:var(--blue)}
+
+.gift-card:hover{transform:translateY(-3px);border-color:#333}
+.gift-card:active{transform:scale(.98)}
+
+.gc-icon{font-size:32px;margin-bottom:10px;display:block}
+.gc-title{font-size:13px;font-weight:700;color:var(--white);margin-bottom:4px;line-height:1.3}
+.gc-desc{font-size:11px;color:#555;line-height:1.5}
+
+/* staggered entrance */
+.gift-card:nth-child(1){animation:popIn .5s .1s ease both}
+.gift-card:nth-child(2){animation:popIn .5s .2s ease both}
+.gift-card:nth-child(3){animation:popIn .5s .3s ease both}
+.gift-card:nth-child(4){animation:popIn .5s .4s ease both}
+
+/* ══════════════════════════════════════════════
+   SCREEN 4 — GIFT CONTENT
+══════════════════════════════════════════════ */
+#s-gift{background:var(--bg);align-items:center;justify-content:flex-start;
+        padding-top:36px;padding-bottom:40px}
+
+.gift-header{width:100%;max-width:420px;margin-bottom:20px;text-align:left}
+.back-btn{font-size:12px;color:#444;cursor:pointer;margin-bottom:12px;display:inline-flex;
+          align-items:center;gap:6px;font-family:'Space Mono',monospace}
+.back-btn:hover{color:var(--red)}
+.gh-tag{font-size:10px;font-weight:700;color:var(--red);letter-spacing:2px;
+        text-transform:uppercase;margin-bottom:6px}
+.gh-title{font-family:'Black Han Sans',sans-serif;font-size:clamp(30px,8vw,46px);
+          color:var(--white);line-height:1.1;margin-bottom:4px}
+.gh-sub{font-size:12px;color:#444;line-height:1.6}
+
+.gift-content{width:100%;max-width:420px}
+
+/* ── roadmap items ── */
+.roadmap-item{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;
+              border-radius:12px;background:var(--card);border:1px solid var(--border);
+              margin-bottom:8px;animation:slideIn .4s ease both}
+.ri-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;
+        justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;
+        font-family:'Space Mono',monospace}
+.ri-body{flex:1}
+.ri-phase{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px}
+.ri-title{font-size:13px;font-weight:700;color:var(--white);margin-bottom:2px}
+.ri-topics{font-size:11px;color:#555;line-height:1.5}
+
+/* ── resource links ── */
+.resource-item{display:flex;align-items:center;gap:12px;padding:14px 16px;
+               border-radius:12px;background:var(--card);border:1px solid var(--border);
+               margin-bottom:8px;cursor:pointer;text-decoration:none;
+               transition:border-color .15s;animation:slideIn .4s ease both}
+.resource-item:hover{border-color:#333}
+.ri-icon{font-size:24px;flex-shrink:0}
+.ri-info{flex:1;text-align:left}
+.ri-name{font-size:13px;font-weight:700;color:var(--white);margin-bottom:2px}
+.ri-desc{font-size:11px;color:#555}
+.ri-arrow{font-size:14px;color:#333}
+
+/* ── tricky questions ── */
+.question-item{padding:14px 16px;border-radius:12px;background:var(--card);
+               border:1px solid var(--border);margin-bottom:8px;text-align:left;
+               animation:slideIn .4s ease both}
+.qi-num{font-size:10px;font-weight:700;color:var(--red);letter-spacing:1px;margin-bottom:6px}
+.qi-q{font-size:13px;color:var(--white);font-weight:700;margin-bottom:6px;line-height:1.5}
+.qi-code{background:#080810;border:1px solid #1a1a1a;border-radius:6px;
+         padding:8px 10px;font-family:'Space Mono',monospace;font-size:11px;
+         color:#888;margin-bottom:8px;line-height:1.7}
+.qi-toggle{font-size:11px;color:var(--red);cursor:pointer;font-weight:700;
+           font-family:'Space Mono',monospace}
+.qi-ans{font-size:12px;color:var(--green);margin-top:6px;line-height:1.5;display:none}
+
+/* ── tips ── */
+.tip-item{padding:14px 16px;border-radius:12px;background:var(--card);
+          border:1px solid var(--border);margin-bottom:8px;text-align:left;
+          animation:slideIn .4s ease both;border-left:3px solid}
+.tip-item:nth-child(1){border-left-color:var(--red)}
+.tip-item:nth-child(2){border-left-color:var(--amber)}
+.tip-item:nth-child(3){border-left-color:var(--green)}
+.tip-item:nth-child(4){border-left-color:var(--blue)}
+.tip-item:nth-child(5){border-left-color:var(--purple)}
+.tip-title{font-size:13px;font-weight:700;color:var(--white);margin-bottom:4px}
+.tip-body{font-size:12px;color:#666;line-height:1.6}
+
+/* stagger delays */
+.gift-content>*:nth-child(1){animation-delay:.05s}
+.gift-content>*:nth-child(2){animation-delay:.1s}
+.gift-content>*:nth-child(3){animation-delay:.15s}
+.gift-content>*:nth-child(4){animation-delay:.2s}
+.gift-content>*:nth-child(5){animation-delay:.25s}
+.gift-content>*:nth-child(6){animation-delay:.3s}
+.gift-content>*:nth-child(7){animation-delay:.35s}
+.gift-content>*:nth-child(8){animation-delay:.4s}
+
+.bottom-cta{width:100%;max-width:420px;margin-top:20px;padding:16px;
+            background:var(--red);border:none;border-radius:14px;font-size:14px;
+            font-weight:700;color:var(--white);cursor:pointer;
+            font-family:'Space Mono',monospace;letter-spacing:.5px}
+.tagline-footer{font-size:11px;color:#222;margin-top:14px;font-family:'Space Mono',monospace}
+
+/* ══════════════════════════════════════════════
+   KEYFRAMES
+══════════════════════════════════════════════ */
+@keyframes fadeDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+@keyframes shakeBox{0%,100%{transform:none}20%{transform:rotate(-4deg) scale(1.04)}
+  40%{transform:rotate(4deg)}60%{transform:rotate(-3deg)}80%{transform:rotate(2deg)}}
+@keyframes dumbbellDrop{
+  0%{opacity:1;transform:translateX(-50%) translateY(-60px) rotate(-20deg)}
+  60%{transform:translateX(-50%) translateY(10px) rotate(5deg)}
+  80%{transform:translateX(-50%) translateY(-8px) rotate(-2deg)}
+  100%{opacity:1;transform:translateX(-50%) translateY(0) rotate(0deg)}}
+@keyframes smashReveal{
+  0%{opacity:0;transform:scale(1.6)}50%{transform:scale(.95)}100%{opacity:1;transform:scale(1)}}
+@keyframes popIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
+@keyframes flyPiece{
+  0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}
+  100%{opacity:0;transform:var(--fly-dest) rotate(var(--fly-rot)) scale(.3)}}
+@keyframes particleFade{from{opacity:.8}to{opacity:0}}
+
+/* ══════════════════════════════════════════════
+   CONFETTI PARTICLES
+══════════════════════════════════════════════ */
+.confetti{position:fixed;pointer-events:none;z-index:999;font-size:20px;
+          animation:confettiFall 1.2s ease both}
+@keyframes confettiFall{
+  0%{opacity:1;transform:translateY(0) rotate(0deg)}
+  100%{opacity:0;transform:translateY(200px) rotate(720deg)}}
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<!-- ═══ SCREEN 1 : WELCOME ═══ -->
+<div class="screen on" id="s-welcome">
+  <div class="handle-tag">java__gym · welcome gift</div>
+
+  <div class="welcome-title">Welcome to<br><span>The Gym.</span></div>
+  <p class="welcome-sub">You just joined the most intense<br>Java training ground on Instagram.<br>We got something for you.</p>
+
+  <!-- Gift box SVG -->
+  <div class="box-wrap" id="boxWrap">
+    <!-- dumbbell that drops -->
+    <svg class="dumbbell-svg" id="dumbbell" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="42" y="10" width="16" height="80" rx="8" fill="#e94560"/>
+      <rect x="20" y="22" width="60" height="18" rx="6" fill="#c73652"/>
+      <rect x="20" y="60" width="60" height="18" rx="6" fill="#c73652"/>
+      <rect x="8"  y="18" width="20" height="26" rx="5" fill="#e94560"/>
+      <rect x="72" y="18" width="20" height="26" rx="5" fill="#e94560"/>
+      <rect x="8"  y="56" width="20" height="26" rx="5" fill="#e94560"/>
+      <rect x="72" y="56" width="20" height="26" rx="5" fill="#e94560"/>
+    </svg>
+
+    <!-- gift box SVG -->
+    <svg class="box-svg" id="boxSvg" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- box shadow -->
+      <ellipse cx="110" cy="210" rx="80" ry="8" fill="#000" opacity=".4"/>
+      <!-- box body -->
+      <rect x="30" y="110" width="160" height="96" rx="8" fill="#1a1a2e"/>
+      <rect x="30" y="110" width="160" height="96" rx="8" fill="none" stroke="#e94560" stroke-width="2"/>
+      <!-- box lid -->
+      <rect x="22" y="90" width="176" height="28" rx="6" fill="#e94560"/>
+      <!-- lid ribbon vertical -->
+      <rect x="101" y="88" width="18" height="32" rx="4" fill="#c73652"/>
+      <!-- box ribbon vertical -->
+      <rect x="101" y="110" width="18" height="98" rx="0" fill="#c73652" opacity=".5"/>
+      <!-- box ribbon horizontal -->
+      <rect x="30" y="148" width="160" height="12" rx="0" fill="#c73652" opacity=".5"/>
+      <!-- bow left loop -->
+      <ellipse cx="88" cy="74" rx="22" ry="16" fill="#e94560" transform="rotate(-20 88 74)"/>
+      <ellipse cx="88" cy="74" rx="14" ry="10" fill="#c73652" transform="rotate(-20 88 74)"/>
+      <!-- bow right loop -->
+      <ellipse cx="132" cy="74" rx="22" ry="16" fill="#e94560" transform="rotate(20 132 74)"/>
+      <ellipse cx="132" cy="74" rx="14" ry="10" fill="#c73652" transform="rotate(20 132 74)"/>
+      <!-- bow centre -->
+      <circle cx="110" cy="80" r="10" fill="#e94560"/>
+      <circle cx="110" cy="80" r="6"  fill="#fff" opacity=".2"/>
+      <!-- question mark on box -->
+      <text x="110" y="168" text-anchor="middle" font-family="'Space Mono',monospace"
+            font-size="42" font-weight="700" fill="#e94560" opacity=".6">?</text>
+    </svg>
+  </div>
+
+  <p class="tap-prompt"><span>Tap the box</span> to smash it open</p>
+  <button class="open-btn" onclick="startSmash()">SMASH IT OPEN 🏋️</button>
+</div>
+
+<!-- ═══ SCREEN 2 : SMASH ANIMATION ═══ -->
+<div class="screen" id="s-smash">
+  <div class="smash-arena" id="smashArena">
+    <!-- pieces injected by JS -->
+  </div>
+  <div class="smash-text" id="smashText">SMASH!</div>
+  <div class="smash-sub" id="smashSub">Your gift is inside...</div>
+</div>
+
+<!-- ═══ SCREEN 3 : PICK YOUR GIFT ═══ -->
+<div class="screen" id="s-pick">
+  <div class="pick-label">Your welcome gift</div>
+  <div class="pick-title">Pick your<br><span>surprise.</span></div>
+  <p class="pick-sub">4 gifts inside the box.<br>Pick any one — or all of them.</p>
+
+  <div class="gifts-grid">
+    <div class="gift-card" onclick="openGift('roadmap')">
+      <span class="gc-icon">🗺️</span>
+      <div class="gc-title">Java Roadmap</div>
+      <div class="gc-desc">Complete phase-by-phase training plan</div>
+    </div>
+    <div class="gift-card" onclick="openGift('resources')">
+      <span class="gc-icon">📚</span>
+      <div class="gc-title">Best Resources</div>
+      <div class="gc-desc">Free tools, docs & sites to learn Java</div>
+    </div>
+    <div class="gift-card" onclick="openGift('questions')">
+      <span class="gc-icon">🧠</span>
+      <div class="gc-title">5 Tricky Questions</div>
+      <div class="gc-desc">Test yourself right now — can you get 5/5?</div>
+    </div>
+    <div class="gift-card" onclick="openGift('tips')">
+      <span class="gc-icon">💡</span>
+      <div class="gc-title">Pro Tips</div>
+      <div class="gc-desc">5 things every Java beginner must know</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 4 : GIFT CONTENT ═══ -->
+<div class="screen" id="s-gift">
+  <div class="gift-header">
+    <div class="back-btn" onclick="goBack()">← back to gifts</div>
+    <div class="gh-tag" id="gTag"></div>
+    <div class="gh-title" id="gTitle"></div>
+    <div class="gh-sub" id="gSub"></div>
+  </div>
+  <div class="gift-content" id="gContent"></div>
+  <button class="bottom-cta" onclick="showScreen('s-pick')">← Pick Another Gift</button>
+  <div class="tagline-footer">// Your Java workout starts here · @java__gym</div>
+</div>
+
+<script>
+/* ── CANVAS PARTICLES ──────────────────────── */
+const canvas=document.getElementById('canvas');
+const ctx=canvas.getContext('2d');
+let W=canvas.width=window.innerWidth;
+let H=canvas.height=window.innerHeight;
+window.addEventListener('resize',()=>{W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;});
+
+const COLS=['#e94560','#f5a623','#27ae60','#3a86ff','#a855f7'];
+const particles=[];
+for(let i=0;i<60;i++){
+  particles.push({
+    x:Math.random()*W, y:Math.random()*H,
+    r:Math.random()*1.5+.5,
+    vx:(Math.random()-.5)*.3, vy:(Math.random()-.5)*.3,
+    col:COLS[Math.floor(Math.random()*COLS.length)],
+    a:Math.random()*.4+.1
+  });
+}
+function drawParticles(){
+  ctx.clearRect(0,0,W,H);
+  particles.forEach(p=>{
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=p.col;
+    ctx.globalAlpha=p.a;
+    ctx.fill();
+    p.x+=p.vx; p.y+=p.vy;
+    if(p.x<0||p.x>W) p.vx*=-1;
+    if(p.y<0||p.y>H) p.vy*=-1;
+  });
+  ctx.globalAlpha=1;
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+/* ── SCREENS ───────────────────────────────── */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  window.scrollTo(0,0);
+}
+
+/* ── SMASH SEQUENCE ────────────────────────── */
+function startSmash(){
+  const db=document.getElementById('dumbbell');
+  db.classList.add('drop');
+  setTimeout(()=>{
+    showScreen('s-smash');
+    buildSmash();
+  },400);
+}
+
+function buildSmash(){
+  const arena=document.getElementById('smashArena');
+  arena.innerHTML='';
+  const pieces=['📦','🟥','🟧','📫','💥','⬛','🟫','📪'];
+  const dests=[
+    'translate(-120px,-80px)','translate(120px,-80px)',
+    'translate(-160px,40px)','translate(160px,40px)',
+    'translate(-80px,-140px)','translate(80px,-140px)',
+    'translate(-140px,100px)','translate(100px,110px)'
+  ];
+  pieces.forEach((p,i)=>{
+    const el=document.createElement('div');
+    el.className='piece';
+    el.textContent=p;
+    el.style.cssText=`left:50%;top:50%;transform:translate(-50%,-50%);
+      --fly-dest:${dests[i]};--fly-rot:${(i%2?1:-1)*Math.floor(Math.random()*360+180)}deg`;
+    arena.appendChild(el);
+    setTimeout(()=>el.classList.add('fly'),50);
+  });
+
+  // dumbbell in arena
+  const db2=document.createElement('div');
+  db2.style.cssText='position:absolute;top:20px;left:50%;transform:translateX(-50%);font-size:64px;animation:dumbbellDrop .3s ease both';
+  db2.textContent='🏋️';
+  arena.appendChild(db2);
+
+  // SMASH text
+  setTimeout(()=>{
+    document.getElementById('smashText').classList.add('on');
+  },500);
+  setTimeout(()=>{
+    document.getElementById('smashSub').classList.add('on');
+    spawnConfetti();
+  },900);
+  setTimeout(()=>showScreen('s-pick'),2000);
+}
+
+function spawnConfetti(){
+  const icons=['🎉','⭐','🔥','💥','✨','🏆','💪','☕'];
+  for(let i=0;i<20;i++){
+    setTimeout(()=>{
+      const el=document.createElement('div');
+      el.className='confetti';
+      el.textContent=icons[Math.floor(Math.random()*icons.length)];
+      el.style.cssText=`left:${Math.random()*100}vw;top:${Math.random()*40}vh;
+        font-size:${16+Math.random()*20}px;animation-delay:${Math.random()*.5}s`;
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(),1400);
+    },i*60);
+  }
+}
+
+/* ── GIFT DATA ─────────────────────────────── */
+const GIFTS={
+
+  roadmap:{
+    tag:'Java Roadmap',
+    title:'Your Training\nBible.',
+    sub:'5 phases · 0 skips · 100 days. This is how you go from zero to hired.',
+    render:()=>`
+      ${[
+        {phase:'Phase 1',col:'#e94560',label:'Foundations',days:'Days 1–20',
+         topics:'JVM · JDK · JRE · Data Types · Operators · Loops · Arrays · Strings'},
+        {phase:'Phase 2',col:'#f5a623',label:'OOP — The Protein',days:'Days 21–40',
+         topics:'Classes · Objects · Inheritance · Polymorphism · Abstraction · Encapsulation'},
+        {phase:'Phase 3',col:'#3a86ff',label:'Advanced Java',days:'Days 41–60',
+         topics:'Collections · Generics · Exceptions · Lambdas · Streams · Multithreading'},
+        {phase:'Phase 4',col:'#27ae60',label:'DSA in Java',days:'Days 61–80',
+         topics:'Arrays · LinkedList · Stack · Queue · Trees · Graphs · Sorting · DP'},
+        {phase:'Phase 5',col:'#a855f7',label:'Interview Ready',days:'Days 81–100',
+         topics:'Spring Boot · JPA · Design Patterns · JVM Internals · System Design'},
+      ].map((r,i)=>`
+        <div class="roadmap-item" style="animation-delay:${i*.08}s">
+          <div class="ri-num" style="background:${r.col}22;color:${r.col}">${i+1}</div>
+          <div class="ri-body">
+            <div class="ri-phase" style="color:${r.col}">${r.phase} · ${r.days}</div>
+            <div class="ri-title">${r.label}</div>
+            <div class="ri-topics">${r.topics}</div>
+          </div>
+        </div>`).join('')}`
+  },
+
+  resources:{
+    tag:'Best Resources',
+    title:'Free Tools\nThat Slap.',
+    sub:'Hand-picked. All free. Everything you need to go from zero to interview-ready.',
+    render:()=>`
+      ${[
+        {icon:'📖',name:'Official Java Docs',desc:'docs.oracle.com — the source of truth',url:'https://docs.oracle.com/en/java/'},
+        {icon:'🎓',name:'CS50 Java Track',desc:'Harvard free course — best for beginners',url:'https://cs50.harvard.edu'},
+        {icon:'💻',name:'LeetCode',desc:'DSA practice — start Easy, go Daily',url:'https://leetcode.com'},
+        {icon:'🧑‍💻',name:'GeeksForGeeks Java',desc:'Best concept explanations with examples',url:'https://www.geeksforgeeks.org/java/'},
+        {icon:'🎯',name:'Baeldung',desc:'In-depth Java guides — best for advanced',url:'https://www.baeldung.com'},
+        {icon:'☕',name:'java__gym on Instagram',desc:'Daily Java training — free forever',url:'https://instagram.com/java__gym'},
+      ].map((r,i)=>`
+        <a class="resource-item" href="${r.url}" target="_blank" style="animation-delay:${i*.08}s">
+          <div class="ri-icon">${r.icon}</div>
+          <div class="ri-info">
+            <div class="ri-name">${r.name}</div>
+            <div class="ri-desc">${r.desc}</div>
+          </div>
+          <div class="ri-arrow">→</div>
+        </a>`).join('')}`
+  },
+
+  questions:{
+    tag:'5 Tricky Questions',
+    title:'Can You Get\n5 out of 5?',
+    sub:'Most people fail at least 2. Tap "Reveal" to see the answer.',
+    render:()=>`
+      ${[
+        {q:'What is the output?',
+         code:'String s = "Hello";\ns.concat(" World");\nSystem.out.println(s.length());',
+         ans:'5 — String is immutable. concat() returns a new String but nobody captured it. s still points to "Hello".'},
+        {q:'What does this print?',
+         code:'Integer a = 127, b = 127;\nInteger c = 128, d = 128;\nSystem.out.println(a==b);\nSystem.out.println(c==d);',
+         ans:'true / false — Java caches Integer from -128 to 127. a==b uses the same cached object. 128 is not cached so c and d are different objects.'},
+        {q:'What is the output?',
+         code:'try {\n  System.out.print("A");\n  return;\n} finally {\n  System.out.print("B");\n}',
+         ans:'AB — finally ALWAYS runs even with a return in try. The return is paused, finally runs, then method returns.'},
+        {q:'What is the final value of x?',
+         code:'int x = 5;\nx = x++;\nSystem.out.println(x);',
+         ans:'5 — x++ returns current value (5) then increments. But x= overwrites it back to 5. Use ++x to get 6.'},
+        {q:'What exception is thrown?',
+         code:'List<String> list =\n  Arrays.asList("a","b","c");\nlist.add("d");',
+         ans:'UnsupportedOperationException — Arrays.asList returns a fixed-size list. add() is not allowed. Use new ArrayList<>(Arrays.asList(...)) for a mutable list.'},
+      ].map((q,i)=>`
+        <div class="question-item" style="animation-delay:${i*.08}s">
+          <div class="qi-num">Q${i+1} / 5</div>
+          <div class="qi-q">${q.q}</div>
+          <div class="qi-code">${q.code.replace(/\n/g,'<br>')}</div>
+          <span class="qi-toggle" onclick="toggleAns(this)">Reveal answer →</span>
+          <div class="qi-ans">${q.ans}</div>
+        </div>`).join('')}`
+  },
+
+  tips:{
+    tag:'Pro Tips',
+    title:'5 Things You\nMust Know.',
+    sub:'Most Java beginners waste months not knowing these. You won\'t.',
+    render:()=>`
+      ${[
+        {title:'Never use == to compare Strings',
+         body:'== checks if two references point to the same object. Always use .equals() to compare String content. This bug has broken more interviews than anything else.'},
+        {title:'String is immutable — always',
+         body:'Every String method (concat, toUpperCase, replace) returns a NEW String. The original never changes. If you don\'t capture the return value, the result is gone.'},
+        {title:'ArrayList vs LinkedList',
+         body:'ArrayList = fast random access O(1), slow insert/delete in middle O(n). LinkedList = fast insert/delete O(1), slow random access O(n). Use ArrayList by default — LinkedList is rarely the right choice.'},
+        {title:'The JVM is your best friend',
+         body:'Java runs on JVM (Java Virtual Machine). Your code compiles to bytecode (.class), not machine code. The JVM runs that bytecode on any OS. This is why Java is "Write Once, Run Anywhere."'},
+        {title:'Practice output prediction daily',
+         body:'Every day, pick 1 short Java snippet and predict the output before running it. This one habit will make you dangerous in interviews. We do this every single day at java__gym.'},
+      ].map((t,i)=>`
+        <div class="tip-item" style="animation-delay:${i*.08}s">
+          <div class="tip-title">${t.title}</div>
+          <div class="tip-body">${t.body}</div>
+        </div>`).join('')}`
+  }
+};
+
+/* ── OPEN GIFT ──────────────────────────────── */
+function openGift(key){
+  const g=GIFTS[key];
+  document.getElementById('gTag').textContent=g.tag;
+  document.getElementById('gTitle').innerHTML=g.title.replace('\n','<br>');
+  document.getElementById('gSub').textContent=g.sub;
+  document.getElementById('gContent').innerHTML=g.render();
+  showScreen('s-gift');
+}
+
+function goBack(){showScreen('s-pick');}
+
+function toggleAns(el){
+  const ans=el.nextElementSibling;
+  const open=ans.style.display==='block';
+  ans.style.display=open?'none':'block';
+  el.textContent=open?'Reveal answer →':'Hide answer ↑';
+}
+</script>
+</body>
+</html>
